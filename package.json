@@ -6,8 +6,6 @@
   "scripts": {
     "start": "tsc && node  ./dist/src/node/node.js",
     "dev": "ts-node ./src/node/node.ts",
-    "start:client": "tsc && node ./dist/src/client/client.js",
-    "dev:client": "ts-node ./src/client/client.ts",
     "test": "jest"
   },
   "keywords": [],
