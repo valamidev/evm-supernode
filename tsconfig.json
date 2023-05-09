@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "target": "ES2020",
+    "newLine": "lf",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strict": true,
+    "removeComments": true,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "incremental": true,                           
+}
+}
