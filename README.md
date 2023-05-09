@@ -10,6 +10,7 @@ Supernode allow to access to all EVM chain with one node. It's a proxy between c
 
 ### Features:
 
+- Resilient RPC proxy compatible with Web3.js and EtherJS or any other JSON-RPC client
 - Optimized for speed and low memory/cpu usage
 - Broadcast Blocks and TransactionLogs on Websocket
 - Use DefiLlama/chainlist to explore available EVM chains and public nodes
