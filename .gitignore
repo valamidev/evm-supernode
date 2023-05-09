@@ -128,3 +128,4 @@ dist
 config.json
 nodeStore.sqlite
 blockStore/**
+nodeStore.sqlite-journal
