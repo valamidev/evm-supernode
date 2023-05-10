@@ -15,3 +15,19 @@ Supernode allow to access to all EVM chain with one node. It's a proxy between c
 - Broadcast Blocks and TransactionLogs on Websocket
 - Use DefiLlama/chainlist to explore available EVM chains and public nodes
 - Store Metadata about public nodes like latency, errors, rate limits
+
+### Use Proxy mode:
+
+```
+import { ethers } from "ethers";
+
+// Avoid TLS error in case you are using self-signed certificate
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
+const provider = new ethers.JsonRpcProvider("https://localhost/chain/56"); // Binance Smart Chain
+// const provider = new ethers.JsonRpcProvider("https://localhost/chain/1"); // Ethereum Mainnet
+...
+
+const number = await provider.getBlockNumber();
+
+```
