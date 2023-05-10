@@ -62,7 +62,7 @@ export class EthereumAPI {
 
       this.LogPerf();
 
-      return response;
+      return json;
     } catch (error) {
       this.errorCount++;
 

@@ -4,10 +4,14 @@ import https from "https";
 import fs from "fs";
 import path from "path";
 import morgan from "morgan";
+import { v4 as uuidv4 } from "uuid";
+import { EventHandler } from "./eventHandler";
 
 export class RpcProxy {
   app: Express;
+  eventHandler: EventHandler;
   constructor() {
+    this.eventHandler = EventHandler.getInstance();
     this.app = express();
 
     const httpsOptions = {
@@ -31,7 +35,33 @@ export class RpcProxy {
 
       console.log({ method, params, headers, body });
 
-      res.send("Hello World!");
+      const requestId = uuidv4();
+
+      this.eventHandler.emit("rpcRequest", {
+        chainId: Number(params.id),
+        body,
+        requestId,
+      });
+
+      let finished = 0;
+
+      this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
+        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+
+        finished = 1;
+        res.send(data);
+        res.end();
+      });
+
+      setTimeout(() => {
+        if (finished === 1) {
+          return;
+        }
+        res.status(500).send("Request timeout");
+        req.destroy();
+
+        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+      }, 10000);
     });
   }
 }

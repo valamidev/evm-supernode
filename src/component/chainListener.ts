@@ -44,6 +44,18 @@ export class ChainListener {
 
       this.allProviders.push(provider);
     }
+
+    this.eventHandler.on("rpcRequest", async (data) => {
+      if (data.chainId === this.chainId) {
+        const result = await this.providers[
+          Math.floor(Math.random() * this.providers.length)
+        ].ProxyRequest(data.body);
+
+        if (result) {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, result);
+        }
+      }
+    });
   }
 
   Start() {
