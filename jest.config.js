@@ -1,6 +1,8 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 module.exports = {
   globals: {
-    'ts-jest': {
+    "ts-jest": {
       diagnostics: {
         ignoreCodes: [2532],
       },
@@ -14,8 +16,8 @@ module.exports = {
   // collectCoverageFrom: ['src/**/*.ts'],
 
   transform: {
-    '.(ts|tsx)': 'ts-jest',
+    ".(ts|tsx)": "ts-jest",
   },
-  testRegex: '(/__tests__/.*|\\.(test|spec))\\.(ts)$',
-  moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
+  testRegex: "(/__tests__/.*|\\.(test|spec))\\.(ts)$",
+  moduleFileExtensions: ["js", "json", "jsx", "ts", "tsx", "node"],
 };

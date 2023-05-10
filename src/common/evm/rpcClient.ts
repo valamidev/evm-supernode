@@ -17,6 +17,59 @@ export class EthereumAPI {
     this.storage = NodeStorageRepository.getInstance();
   }
 
+  public ProxyRequest = async (body: any) => {
+    const startTime = Date.now();
+
+    try {
+      const response = await RequestPromisesWithTimeout(
+        fetch(this.endpointUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }),
+        this.maxRequestTime
+      );
+
+      const json = await response.json();
+
+      if (json.error) {
+        this.errorCount++;
+
+        if (json.error.message?.includes("usage limit")) {
+          this.rateLimited++;
+        }
+
+        if (json.error.message?.includes("limit exceeded")) {
+          this.rateLimited++;
+        }
+        if (json.error.message?.includes("reached")) {
+          this.rateLimited++;
+        }
+        if (json.error.message?.includes("Too Many Requests")) {
+          this.rateLimited++;
+        }
+      }
+
+      this.latency = Date.now() - startTime;
+      this.requestTimes.push(this.latency);
+
+      // Keep only the last 10 request times
+      if (this.requestTimes.length > 10) {
+        this.requestTimes.shift();
+      }
+
+      this.LogPerf();
+
+      return response;
+    } catch (error) {
+      this.errorCount++;
+
+      throw error;
+    }
+  };
+
   private async MakeMultiRequest(
     requests: { method: string; params: any[] }[]
   ) {

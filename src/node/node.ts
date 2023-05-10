@@ -6,6 +6,7 @@ import { Config } from "../common/config";
 
 import { Level } from "level";
 import { NodeStorageRepository } from "../component/nodeStorage";
+import { RpcProxy } from "../component/rpcProxy";
 
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err);
@@ -80,6 +81,8 @@ const Bootstrap = async () => {
       listener.Start();
     }
   }
+
+  const proxy = new RpcProxy();
 
   console.log("EVM Block Relay is running...");
 };
