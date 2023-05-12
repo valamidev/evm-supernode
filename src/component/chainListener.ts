@@ -36,8 +36,11 @@ export class ChainListener {
       this.blockTime = this.config.blockTimeMs;
     }
 
+    this.LoadProxy();
     this.LoadProviders();
+  }
 
+  async LoadProxy() {
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
         const result = await this.providers[

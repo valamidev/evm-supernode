@@ -1,17 +1,16 @@
 # EVM-Supernode
 
-Single Supernode for all EVM chain, Supernode allow to access to all EVM chain with one node. It's a proxy between client and EVM chain nodes.
-Writen in NodeJS and Typescript require Node v16 or higher.
+Single Supernode for all EVM chains. Supernode allows access to all EVM chains with a single node. It acts as a proxy between the client and EVM chain nodes. Written in Node.js and Typescript, it requires Node v16 or higher.
 
 ### Under development! ** DO NOT USE IN PRODUCTION **
 
 ### Features:
 
 - Resilient RPC proxy compatible with Web3.js and EtherJS or any other JSON-RPC client
-- Optimized for speed and low memory/cpu usage
-- Broadcast Blocks and TransactionLogs on Websocket
+- Optimized for speed and low memory/CPU usage
+- Broadcast Blocks and TransactionLogs on WebSocket
 - Use https://github.com/DefiLlama/chainlist to explore available EVM chains and public nodes
-- Store Metadata about public nodes like latency, errors, rate limits
+- Store metadata about public nodes, such as latency, errors, and rate limits
 
 ### How to start:
 
