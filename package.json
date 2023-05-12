@@ -2,7 +2,11 @@
   "name": "evm-block-relay",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "main": "index.js",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "start": "tsc && node  ./dist/src/node/node.js",
     "dev": "ts-node ./src/node/node.ts",

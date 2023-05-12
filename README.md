@@ -1,4 +1,4 @@
-# evm-supernode
+# EVM-Supernode
 
 Single Supernode for all EVM chain
 
@@ -7,6 +7,7 @@ Single Supernode for all EVM chain
 ### Abstract:
 
 Supernode allow to access to all EVM chain with one node. It's a proxy between client and EVM chain nodes.
+Writen in NodeJS and Typescript require Node v16 or higher.
 
 ### Features:
 
@@ -15,6 +16,17 @@ Supernode allow to access to all EVM chain with one node. It's a proxy between c
 - Broadcast Blocks and TransactionLogs on Websocket
 - Use https://github.com/DefiLlama/chainlist to explore available EVM chains and public nodes
 - Store Metadata about public nodes like latency, errors, rate limits
+
+### How to start:
+
+```
+# Rename config.default.json to config.json
+# yarn install / npm install
+# yarn start
+
+# To improve security please add your own SSL cert under assets/ folder
+
+```
 
 ### Config:
 
