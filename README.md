@@ -1,13 +1,9 @@
 # EVM-Supernode
 
-Single Supernode for all EVM chain
+Single Supernode for all EVM chain, Supernode allow to access to all EVM chain with one node. It's a proxy between client and EVM chain nodes.
+Writen in NodeJS and Typescript require Node v16 or higher.
 
 ### Under development! ** DO NOT USE IN PRODUCTION **
-
-### Abstract:
-
-Supernode allow to access to all EVM chain with one node. It's a proxy between client and EVM chain nodes.
-Writen in NodeJS and Typescript require Node v16 or higher.
 
 ### Features:
 
