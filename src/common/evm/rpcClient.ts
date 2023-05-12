@@ -224,6 +224,10 @@ export class EthereumAPI {
     };
   }
 
+  async getChainId() {
+    return parseInt(await this.MakeRequest("eth_chainId", []), 16);
+  }
+
   async getBlockNumber() {
     return parseInt(await this.MakeRequest("eth_blockNumber", []), 16);
   }

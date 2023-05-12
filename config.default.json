@@ -1,10 +1,13 @@
 {
-    "websocketEnabled": true,
+    "proxyEnabled": true,
+    "realTimeBlockFetch": false,
+    "websocketEnabled": false,
     "websocketPort": 8080,
     "loggingEnabled": true,
     "blockStoreEnabled": false,
     "nodeStorage": true,
-    "allowedChains": [1,25,56,137,250,2000,42161,43114],
+    "enableWhitelist": false,
+    "whitelistChains": [1,25,56,137,250,2000,42161,43114],
     "chainConfigs": {
         "1": {
             "name": "Ethereum",

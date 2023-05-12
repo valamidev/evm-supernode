@@ -24,7 +24,8 @@ export class ChainListener {
   constructor(
     private readonly chainId: number,
     private readonly chainName: string,
-    private rpcs: string[]
+    private rpcs: string[],
+    private realTimeBlockFetch = true
   ) {
     this.eventHandler = EventHandler.getInstance();
     this.logging = Config.load()?.loggingEnabled;
@@ -35,15 +36,7 @@ export class ChainListener {
       this.blockTime = this.config.blockTimeMs;
     }
 
-    for (const rpc of this.rpcs) {
-      const provider = new EthereumAPI(rpc, chainId, chainName);
-
-      if (this.providers.length < this.maxProviderCount) {
-        this.providers.push(provider);
-      }
-
-      this.allProviders.push(provider);
-    }
+    this.LoadProviders();
 
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
@@ -56,6 +49,26 @@ export class ChainListener {
         }
       }
     });
+  }
+
+  async LoadProviders() {
+    for (const rpc of this.rpcs) {
+      const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+
+      if (this.providers.length < this.maxProviderCount) {
+        const chainId = await provider.getChainId();
+
+        if (chainId !== this.chainId) {
+          this.Logging(
+            `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
+          );
+        } else {
+          this.providers.push(provider);
+        }
+      }
+
+      this.allProviders.push(provider);
+    }
   }
 
   Start() {
@@ -85,10 +98,17 @@ export class ChainListener {
       }
     }, this.blockTime * 30);
 
-    this.FetchBlocks();
+    if (this.realTimeBlockFetch) {
+      this.FetchBlocks();
+    }
   }
 
-  async FetchBlocks() {
+  async FetchBlocks(): Promise<void> {
+    if (this.providers.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return this.FetchBlocks();
+    }
+
     try {
       if (this.latestBlock === 0) {
         await this.GetBlockNumber();
@@ -103,7 +123,7 @@ export class ChainListener {
       this.Logging(error, "Timeout", this.blockTime);
       await new Promise((resolve) => setTimeout(resolve, this.blockTime));
     } finally {
-      this.FetchBlocks();
+      return this.FetchBlocks();
     }
   }
 
@@ -305,9 +325,13 @@ export class ChainListener {
       try {
         await nextProvider.getFullBlock(this.latestBlock);
 
-        this.providers.pop();
+        const chainId = await nextProvider.getChainId();
 
-        this.providers.push(nextProvider);
+        if (chainId !== this.chainId) {
+          this.providers.pop();
+
+          this.providers.push(nextProvider);
+        }
       } catch (error) {
         throw error;
       }

@@ -58,19 +58,21 @@ const Bootstrap = async () => {
   }
 
   for (const chain of chainData) {
-    if (config.allowedChains?.includes(chain.chainId)) {
-      const startNodes = await nodeStorage.findStartNodes(chain.chainId);
+    if (config.enableWhitelist) {
+      if (config.whitelistChains?.includes(chain.chainId)) {
+        const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-      const listener = new ChainListener(chain.chainId, chain.name, [
-        ...startNodes.map((e) => e.rpcAddress),
-        ...chain.rpcs,
-      ]);
+        const listener = new ChainListener(
+          chain.chainId,
+          chain.name,
+          [...startNodes.map((e) => e.rpcAddress), ...chain.rpcs],
+          config.realTimeBlockFetch
+        );
 
-      listener.Start();
-      continue;
-    }
-
-    if (config.allowedChains?.length === 0) {
+        listener.Start();
+        continue;
+      }
+    } else {
       const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
       const listener = new ChainListener(chain.chainId, chain.name, [
@@ -82,7 +84,9 @@ const Bootstrap = async () => {
     }
   }
 
-  const proxy = new RpcProxy();
+  if (config.proxyEnabled) {
+    const proxy = new RpcProxy();
+  }
 
   console.log("EVM Block Relay is running...");
 };
