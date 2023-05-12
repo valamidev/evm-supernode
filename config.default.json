@@ -3,7 +3,7 @@
     "realTimeBlockFetch": false,
     "websocketEnabled": false,
     "websocketPort": 8080,
-    "loggingEnabled": true,
+    "loggingEnabled": false,
     "blockStoreEnabled": false,
     "nodeStorage": true,
     "enableWhitelist": false,
