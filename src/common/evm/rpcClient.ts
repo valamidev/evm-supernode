@@ -34,33 +34,9 @@ export class EthereumAPI {
 
       const json = await response.json();
 
-      if (json.error) {
-        this.errorCount++;
+      this.HandleError(json);
 
-        if (json.error.message?.includes("usage limit")) {
-          this.rateLimited++;
-        }
-
-        if (json.error.message?.includes("limit exceeded")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("reached")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("Too Many Requests")) {
-          this.rateLimited++;
-        }
-      }
-
-      this.latency = Date.now() - startTime;
-      this.requestTimes.push(this.latency);
-
-      // Keep only the last 10 request times
-      if (this.requestTimes.length > 10) {
-        this.requestTimes.shift();
-      }
-
-      this.LogPerf();
+      this.LogPerf(startTime);
 
       return json;
     } catch (error) {
@@ -96,35 +72,9 @@ export class EthereumAPI {
 
       const json = await response.json();
 
-      if (json.error) {
-        this.errorCount++;
+      this.HandleError(json);
 
-        if (json.error.message?.includes("usage limit")) {
-          this.rateLimited++;
-        }
-
-        if (json.error.message?.includes("limit exceeded")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("reached")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("Too Many Requests")) {
-          this.rateLimited++;
-        }
-
-        throw new Error(json.error.message);
-      }
-
-      this.latency = Date.now() - startTime;
-      this.requestTimes.push(this.latency);
-
-      // Keep only the last 10 request times
-      if (this.requestTimes.length > 10) {
-        this.requestTimes.shift();
-      }
-
-      this.LogPerf();
+      this.LogPerf(startTime);
 
       return json.map((response: any) => response.result);
     } catch (error) {
@@ -153,35 +103,9 @@ export class EthereumAPI {
 
       const json = await response.json();
 
-      if (json.error) {
-        this.errorCount++;
+      this.HandleError(json);
 
-        if (json.error.message?.includes("usage limit")) {
-          this.rateLimited++;
-        }
-
-        if (json.error.message?.includes("limit exceeded")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("reached")) {
-          this.rateLimited++;
-        }
-        if (json.error.message?.includes("Too Many Requests")) {
-          this.rateLimited++;
-        }
-
-        throw new Error(json.error.message);
-      }
-
-      this.latency = Date.now() - startTime;
-      this.requestTimes.push(this.latency);
-
-      // Keep only the last 10 request times
-      if (this.requestTimes.length > 10) {
-        this.requestTimes.shift();
-      }
-
-      this.LogPerf();
+      this.LogPerf(startTime);
 
       return json.result;
     } catch (error) {
@@ -272,7 +196,43 @@ export class EthereumAPI {
     ]);
   }
 
-  private async LogPerf() {
+  private HandleError(json: any) {
+    this.errorCount++;
+
+    let knownError = false;
+
+    if (json.error.message?.includes("usage limit")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+
+    if (json.error.message?.includes("limit exceeded")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+    if (json.error.message?.includes("reached")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+    if (json.error.message?.includes("Too Many Requests")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+
+    if (!knownError) {
+      //  console.log("Error", json.error.message);
+    }
+  }
+
+  private async LogPerf(startTime: number) {
+    this.latency = Date.now() - startTime;
+    this.requestTimes.push(this.latency);
+
+    // Keep only the last 10 request times
+    if (this.requestTimes.length > 10) {
+      this.requestTimes.slice(-10);
+    }
+
     const averageLatency =
       this.requestTimes.reduce((sum, t) => sum + t, 0) /
       this.requestTimes.length;
