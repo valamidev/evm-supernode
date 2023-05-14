@@ -1,13 +1,11 @@
-import { ChainConfig, Config } from "../common/config";
-import { EthereumAPI } from "../common/evm/rpcClient";
-import {
-  RequestMultiplePromisesWithTimeout,
-  RequestPromisesWithTimeout,
-} from "../common/promise/handler";
-import { GetConsensusValue } from "../common/utilts";
-import { EventHandler } from "./eventHandler";
+import { EventHandler } from "../../../component/eventHandler";
+import { ChainConfig, Config } from "../../config";
+import { EthereumAPI } from "../../evm/rpcClient";
+import { RequestMultiplePromisesWithTimeout } from "../../promise/handler";
+import { GetConsensusValue } from "../../utilts";
+import { EvmChainHandler } from "../interface";
 
-export class ChainListener {
+export class DefaultChainHandler implements EvmChainHandler {
   private readonly maxProviderCount = 5;
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
@@ -23,8 +21,8 @@ export class ChainListener {
   private readonly logging: boolean | undefined;
 
   constructor(
-    private readonly chainId: number,
-    private readonly chainName: string,
+    private chainId: number,
+    private chainName: string,
     private rpcs: string[],
     private realTimeBlockFetch = true
   ) {
@@ -41,59 +39,7 @@ export class ChainListener {
     this.LoadProviders();
   }
 
-  async ProxyRequestHandlerInit() {
-    this.eventHandler.on("rpcRequest", async (data) => {
-      if (data.chainId === this.chainId) {
-        const promises = this.providers.map((provider) => {
-          return provider.ProxyRequest(data.body);
-        });
-
-        const { success, error } = await RequestMultiplePromisesWithTimeout(
-          promises,
-          this.maxProxyRequestTime
-        );
-
-        if (success[0]) {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, success[0]);
-        } else {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, {
-            jsonrpc: "2.0",
-            id: 1,
-            error: {
-              code: -32603,
-              message: "RPC-proxy error",
-              data: "Unable to receive response from any provider",
-            },
-          });
-        }
-      }
-    });
-  }
-
-  async LoadProviders() {
-    for (const rpc of this.rpcs) {
-      const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
-
-      if (this.providers.length < this.maxProviderCount) {
-        try {
-          const chainId = await provider.getChainId();
-          if (chainId !== this.chainId) {
-            this.Logging(
-              `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
-            );
-          } else {
-            this.providers.push(provider);
-          }
-        } catch (error) {
-          this.Logging(`Unable to init RPC, ${provider.endpointUrl}`, error);
-        }
-      }
-
-      this.allProviders.push(provider);
-    }
-  }
-
-  Start() {
+  public Start() {
     if (!this.config?.blockTimeMs) {
       setTimeout(async () => {
         try {
@@ -122,6 +68,58 @@ export class ChainListener {
 
     if (this.realTimeBlockFetch) {
       this.FetchBlocks();
+    }
+  }
+
+  private async ProxyRequestHandlerInit() {
+    this.eventHandler.on("rpcRequest", async (data) => {
+      if (data.chainId === this.chainId) {
+        const promises = this.providers.map((provider) => {
+          return provider.ProxyRequest(data.body);
+        });
+
+        const { success, error } = await RequestMultiplePromisesWithTimeout(
+          promises,
+          this.maxProxyRequestTime
+        );
+
+        if (success[0]) {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, success[0]);
+        } else {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, {
+            jsonrpc: "2.0",
+            id: 1,
+            error: {
+              code: -32603,
+              message: "RPC-proxy error",
+              data: "Unable to receive response from any provider",
+            },
+          });
+        }
+      }
+    });
+  }
+
+  private async LoadProviders() {
+    for (const rpc of this.rpcs) {
+      const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+
+      if (this.providers.length < this.maxProviderCount) {
+        try {
+          const chainId = await provider.getChainId();
+          if (chainId !== this.chainId) {
+            this.Logging(
+              `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
+            );
+          } else {
+            this.providers.push(provider);
+          }
+        } catch (error) {
+          this.Logging(`Unable to init RPC, ${provider.endpointUrl}`, error);
+        }
+      }
+
+      this.allProviders.push(provider);
     }
   }
 

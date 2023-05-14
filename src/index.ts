@@ -3,13 +3,13 @@ dotenv.config();
 
 import WebSocket from "ws";
 import { GetChainData } from "./common/chainData/chainData";
-import { ChainListener } from "./component/chainListener";
+import { ChainHandler } from "./common/chainHandler/chainHandler";
 import { EventHandler } from "./component/eventHandler";
 import { Config } from "./common/config";
 
 import { Level } from "level";
 import { NodeStorageRepository } from "./component/nodeStorage";
-import { RpcProxy } from "./component/rpcProxy";
+import { RpcProxy } from "./common/rpcProxy/rpcProxy";
 
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err, err.stack);
@@ -65,7 +65,7 @@ const Bootstrap = async () => {
       if (config.whitelistChains?.includes(chain.chainId)) {
         const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-        const listener = new ChainListener(
+        const listener = ChainHandler.init(
           chain.chainId,
           chain.name,
           [...startNodes.map((e) => e.rpcAddress), ...chain.rpcs],
@@ -78,7 +78,7 @@ const Bootstrap = async () => {
     } else {
       const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-      const listener = new ChainListener(chain.chainId, chain.name, [
+      const listener = ChainHandler.init(chain.chainId, chain.name, [
         ...startNodes.map((e) => e.rpcAddress),
         ...chain.rpcs,
       ]);

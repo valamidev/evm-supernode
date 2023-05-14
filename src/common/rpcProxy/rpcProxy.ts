@@ -5,8 +5,8 @@ import fs from "fs";
 import path from "path";
 import morgan from "morgan";
 import { v4 as uuidv4 } from "uuid";
-import { EventHandler } from "./eventHandler";
-import { NodeStorageRepository } from "./nodeStorage";
+import { EventHandler } from "../../component/eventHandler";
+import { NodeStorageRepository } from "../../component/nodeStorage";
 
 export class RpcProxy {
   app: Express;
