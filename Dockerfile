@@ -1,27 +1,20 @@
-# Base image
 FROM node:18-alpine
-
-# Set the working directory
 WORKDIR /app
-
-# Copy package.json and yarn.lock
 COPY package.json yarn.lock ./
-
-# Install dependencies
-RUN yarn install --frozen-lockfile --production=true
-
-# Copy the rest of the application code
-COPY . .
-
-# Build the TypeScript code
+COPY src ./src
+COPY tsconfig.json ./tsconfig.json
+RUN ls -a
+RUN yarn install --frozen-lockfile
 RUN yarn build
 
-# Set the environment variables
-ENV NODE_ENV=production
-
-# Expose the application port
+## this is stage two , where the app actually runs
+FROM node:18-alpine
+WORKDIR /app
+COPY package.json yarn.lock ./
+COPY assets ./assets
+COPY config.default.json ./config.default.json
+RUN yarn install --frozen-lockfile --production=true
+COPY --from=0 /app/dist ./dist
 EXPOSE 443
 EXPOSE 8080
-
-# Start the application
 CMD ["yarn", "start"]
