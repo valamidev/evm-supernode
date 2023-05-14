@@ -2,8 +2,6 @@
 
 Single Supernode for all EVM chains. Supernode allows access to all EVM chains with a single node. It acts as a proxy between the client and EVM chain nodes. Written in Node.js and Typescript, it requires Node v16 or higher.
 
-### Under development! ** DO NOT USE IN PRODUCTION **
-
 ### Features:
 
 - Resilient RPC proxy compatible with Web3.js and EtherJS or any other JSON-RPC client
