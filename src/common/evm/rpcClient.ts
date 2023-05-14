@@ -197,6 +197,8 @@ export class EthereumAPI {
   }
 
   private HandleError(json: any) {
+    if (!json.error) return;
+
     this.errorCount++;
 
     let knownError = false;
@@ -219,8 +221,8 @@ export class EthereumAPI {
       knownError = true;
     }
 
-    if (!knownError) {
-      //  console.log("Error", json.error.message);
+    if (json.error.message) {
+      throw new Error("RPC Error: " + json.error.message);
     }
   }
 

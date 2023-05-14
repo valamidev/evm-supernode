@@ -9,7 +9,7 @@ import { NodeStorageRepository } from "../component/nodeStorage";
 import { RpcProxy } from "../component/rpcProxy";
 
 process.on("uncaughtException", function (err) {
-  console.log("Caught exception: " + err);
+  console.log("Caught exception: " + err, err.stack);
 });
 
 const Bootstrap = async () => {

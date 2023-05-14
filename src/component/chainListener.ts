@@ -13,6 +13,7 @@ export class ChainListener {
   private readonly allProviders: EthereumAPI[] = [];
 
   private maxRequestTime: number = 1500;
+  private maxProxyRequestTime: number = 5000;
   private latestBlock: number = 0;
   private blockLag: number = 0;
   private blockTime: number = 15 * 1000; // ETH default block time
@@ -36,19 +37,34 @@ export class ChainListener {
       this.blockTime = this.config.blockTimeMs;
     }
 
-    this.LoadProxy();
+    this.ProxyRequestHandlerInit();
     this.LoadProviders();
   }
 
-  async LoadProxy() {
+  async ProxyRequestHandlerInit() {
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
-        const result = await this.providers[
-          Math.floor(Math.random() * this.providers.length)
-        ].ProxyRequest(data.body);
+        const promises = this.providers.map((provider) => {
+          return provider.ProxyRequest(data.body);
+        });
 
-        if (result) {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, result);
+        const { success, error } = await RequestMultiplePromisesWithTimeout(
+          promises,
+          this.maxProxyRequestTime
+        );
+
+        if (success[0]) {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, success[0]);
+        } else {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, {
+            jsonrpc: "2.0",
+            id: 1,
+            error: {
+              code: -32603,
+              message: "RPC-proxy error",
+              data: "Unable to receive response from any provider",
+            },
+          });
         }
       }
     });
