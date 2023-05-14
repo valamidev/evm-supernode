@@ -1,13 +1,10 @@
-import { ChainConfig, Config } from "../common/config";
-import { EthereumAPI } from "../common/evm/rpcClient";
-import {
-  RequestMultiplePromisesWithTimeout,
-  RequestPromisesWithTimeout,
-} from "../common/promise/handler";
-import { GetConsensusValue } from "../common/utilts";
-import { EventHandler } from "./eventHandler";
+import { ChainConfig, Config } from "../config";
+import { EthereumAPI } from "../evm/rpcClient";
+import { RequestMultiplePromisesWithTimeout } from "../promise/handler";
+import { GetConsensusValue } from "../utilts";
+import { EventHandler } from "../../component/eventHandler";
 
-export class ChainListener {
+export class ChainHandler {
   private readonly maxProviderCount = 5;
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
