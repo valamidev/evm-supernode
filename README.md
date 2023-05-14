@@ -43,6 +43,29 @@ Single Supernode for all EVM chains. Supernode allows access to all EVM chains w
     }
 ```
 
+### Service end-points:
+
+```
+# List of all nodes and metadata
+https://localhost/nodes
+/*
+  [{
+    "id": 29,
+    "chainName": "ethereum",
+    "chainId": 1,
+    "rpcAddress": "https://eth-mainnet.nodereal.io/v1/1659dfb40aa24bbb8153a677b98064d7",
+    "latency": 342,
+    "errorCount": 2,
+    "rateLimit": 2
+  },
+  ...]
+*/
+
+# Health status
+https://localhost/health
+
+```
+
 ### Use Proxy mode:
 
 ```
