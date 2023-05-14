@@ -8,8 +8,9 @@
     "node": ">=16"
   },
   "scripts": {
-    "start": "tsc && node  ./dist/src/index.js",
     "dev": "ts-node ./src/index.ts",
+    "start": "node  ./dist/src/index.js",
+    "build": "tsc",
     "test": "jest"
   },
   "keywords": [],
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/morgan": "^1.9.4",
+    "@types/uuid": "^9.0.1",
     "@types/ws": "^8.5.4",
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
