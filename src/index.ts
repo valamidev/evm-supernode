@@ -65,7 +65,7 @@ const Bootstrap = async () => {
       if (config.whitelistChains?.includes(chain.chainId)) {
         const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-        const listener = new ChainHandler(
+        const listener = ChainHandler.init(
           chain.chainId,
           chain.name,
           [...startNodes.map((e) => e.rpcAddress), ...chain.rpcs],
@@ -78,7 +78,7 @@ const Bootstrap = async () => {
     } else {
       const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-      const listener = new ChainHandler(chain.chainId, chain.name, [
+      const listener = ChainHandler.init(chain.chainId, chain.name, [
         ...startNodes.map((e) => e.rpcAddress),
         ...chain.rpcs,
       ]);
