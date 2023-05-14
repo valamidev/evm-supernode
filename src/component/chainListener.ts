@@ -75,14 +75,17 @@ export class ChainListener {
       const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
 
       if (this.providers.length < this.maxProviderCount) {
-        const chainId = await provider.getChainId();
-
-        if (chainId !== this.chainId) {
-          this.Logging(
-            `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
-          );
-        } else {
-          this.providers.push(provider);
+        try {
+          const chainId = await provider.getChainId();
+          if (chainId !== this.chainId) {
+            this.Logging(
+              `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
+            );
+          } else {
+            this.providers.push(provider);
+          }
+        } catch (error) {
+          this.Logging(`Unable to init RPC, ${provider.endpointUrl}`, error);
         }
       }
 

@@ -12,6 +12,8 @@
     "start": "node  ./dist/index.js",
     "build": "tsc",
     "docker": "docker build -t evm-supernode .",
+    "docker:tag": "docker tag evm-supernode valamidev/evm-supernode:latest",
+    "docker:push": "docker push valamidev/evm-supernode:latest",
     "test": "jest"
   },
   "keywords": [],
