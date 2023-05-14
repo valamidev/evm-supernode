@@ -8,8 +8,8 @@
     "node": ">=16"
   },
   "scripts": {
-    "start": "tsc && node  ./dist/src/node/node.js",
-    "dev": "ts-node ./src/node/node.ts",
+    "start": "tsc && node  ./dist/src/index.js",
+    "dev": "ts-node ./src/index.ts",
     "test": "jest"
   },
   "keywords": [],

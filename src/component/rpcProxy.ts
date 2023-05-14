@@ -6,13 +6,16 @@ import path from "path";
 import morgan from "morgan";
 import { v4 as uuidv4 } from "uuid";
 import { EventHandler } from "./eventHandler";
+import { NodeStorageRepository } from "./nodeStorage";
 
 export class RpcProxy {
   app: Express;
   eventHandler: EventHandler;
+  storage: NodeStorageRepository;
   constructor() {
     this.eventHandler = EventHandler.getInstance();
     this.app = express();
+    this.storage = NodeStorageRepository.getInstance();
 
     const httpsOptions = {
       key: fs.readFileSync(path.resolve(process.cwd(), "./assets/key.pem")),
@@ -20,7 +23,10 @@ export class RpcProxy {
     };
 
     this.app.use(bodyParser.json());
-    this.app.use(morgan("dev"));
+
+    if (process.env.STAGE === "dev") {
+      this.app.use(morgan("dev"));
+    }
 
     this.Start();
 
@@ -30,6 +36,17 @@ export class RpcProxy {
   }
 
   public Start() {
+    // Pod Health status
+    this.app.get("/health", (req, res) => {
+      res.send("OK");
+    });
+
+    this.app.get("/nodes", async (req, res) => {
+      const resp = await this.storage.findAll();
+
+      res.send(JSON.stringify(resp.sort((a, b) => a.chainId - b.chainId)));
+    });
+
     this.app.post("/chain/:id", async (req, res) => {
       const { method, headers, body, params } = req;
 

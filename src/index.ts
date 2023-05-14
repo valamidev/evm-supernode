@@ -1,12 +1,15 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import WebSocket from "ws";
-import { GetChainData } from "../common/chainData/chainData";
-import { ChainListener } from "../component/chainListener";
-import { EventHandler } from "../component/eventHandler";
-import { Config } from "../common/config";
+import { GetChainData } from "./common/chainData/chainData";
+import { ChainListener } from "./component/chainListener";
+import { EventHandler } from "./component/eventHandler";
+import { Config } from "./common/config";
 
 import { Level } from "level";
-import { NodeStorageRepository } from "../component/nodeStorage";
-import { RpcProxy } from "../component/rpcProxy";
+import { NodeStorageRepository } from "./component/nodeStorage";
+import { RpcProxy } from "./component/rpcProxy";
 
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err, err.stack);
