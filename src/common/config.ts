@@ -28,17 +28,35 @@ export class Config implements ConfigInterface {
   private constructor() {}
 
   public static load(): ConfigInterface {
-    if (!Config.instance) {
-      Config.instance = new Config();
+    try {
+      if (!Config.instance) {
+        Config.instance = new Config();
 
-      const config = LoadConfig("config.json");
+        let config: ConfigInterface = {};
 
-      Object.entries(config).forEach(([key, value]) => {
-        (Config.instance as any)[key] = value;
-      });
+        try {
+          config = LoadConfig("config.json");
+        } catch (error) {
+          console.log(
+            "No config.json found, fallback to config.default.config"
+          );
+
+          config = LoadConfig("config.default.json");
+        }
+
+        Object.entries(config).forEach(([key, value]) => {
+          (Config.instance as any)[key] = value;
+        });
+      }
+
+      return Config.instance;
+    } catch (error) {
+      console.log("No valid configuration found!");
+
+      console.error(error);
+
+      process.exit(1);
     }
-
-    return Config.instance;
   }
 }
 
