@@ -2,6 +2,12 @@
 
 Single Supernode for all EVM chains. Supernode allows access to all EVM chains with a single node. It acts as a proxy between the client and EVM chain nodes. Written in Node.js and Typescript, it requires Node v16 or higher.
 
+### Docker image available:
+- https://hub.docker.com/r/valamidev/evm-supernode
+```
+docker run -p 443:443 evm-supernode:latest
+```
+
 ### Features:
 
 - Resilient RPC proxy compatible with Web3.js and EtherJS or any other JSON-RPC client
