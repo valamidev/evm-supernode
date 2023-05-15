@@ -17,4 +17,4 @@ RUN yarn install --frozen-lockfile --production=true
 COPY --from=0 /app/dist ./dist
 EXPOSE 443
 EXPOSE 8080
-CMD ["yarn", "start"]
+CMD ["yarn", "start:docker"]
