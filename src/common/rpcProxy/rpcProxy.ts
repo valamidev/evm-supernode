@@ -50,7 +50,9 @@ export class RpcProxy {
     this.app.post("/chain/:id", async (req, res) => {
       const { method, headers, body, params } = req;
 
-      console.log({ method, params, headers, body });
+      if (process.env.STAGE === "dev") {
+        console.log({ method, params, headers, body });
+      }
 
       const requestId = uuidv4();
 
