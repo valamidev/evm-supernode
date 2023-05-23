@@ -37,6 +37,7 @@ export class DefaultChainHandler implements EvmChainHandler {
 
     this.ProxyRequestHandlerInit();
     this.LoadProviders();
+    this.NewProviderHandler();
   }
 
   public Start() {
@@ -121,6 +122,27 @@ export class DefaultChainHandler implements EvmChainHandler {
 
       this.allProviders.push(provider);
     }
+  }
+
+  private NewProviderHandler() {
+    this.eventHandler.on("rpcNode", (event) => {
+      const uniqueProviders = new Set([
+        ...this.allProviders.map((e) => e.endpointUrl),
+      ]);
+
+      if (event.chainId === this.chainId) {
+        event.nodes.forEach(async (endpointUrl: string) => {
+          if (!uniqueProviders.has(endpointUrl)) {
+            const provider = new EthereumAPI(
+              endpointUrl,
+              this.chainId,
+              this.chainName
+            );
+            this.allProviders.push(provider);
+          }
+        });
+      }
+    });
   }
 
   async FetchBlocks(): Promise<void> {

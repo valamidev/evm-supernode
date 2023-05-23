@@ -17,4 +17,8 @@ export class EventHandler extends EventEmitter {
   public EmitBlock(blockData: Record<string, unknown>) {
     this.emit("newBlock", blockData);
   }
+
+  public EmitRpcNodes(rpcNodeData: Record<string, unknown>) {
+    this.emit("rpcNode", rpcNodeData);
+  }
 }

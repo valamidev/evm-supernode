@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import WebSocket from "ws";
-import { GetChainData } from "./common/chainData/chainData";
+import { ChainDataService } from "./common/chainData/chainData";
 import { ChainHandler } from "./common/chainHandler/chainHandler";
 import { EventHandler } from "./component/eventHandler";
 import { Config } from "./common/config";
@@ -18,11 +18,15 @@ process.on("uncaughtException", function (err) {
 const Bootstrap = async () => {
   const config = Config.load();
 
+  const eventHandler = EventHandler.getInstance();
+
   const nodeStorage = await NodeStorageRepository.init();
 
-  const chainData = await GetChainData();
+  const chainDataService = new ChainDataService();
 
-  const eventHandler = EventHandler.getInstance();
+  const chainData = await chainDataService.getChainData();
+
+  console.log("Chain data loaded...", chainData.length, " chain found");
 
   if (config.websocketEnabled) {
     const server = new WebSocket.Server({
