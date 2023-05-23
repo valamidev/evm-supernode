@@ -95,7 +95,7 @@ const Bootstrap = async () => {
     const proxy = new RpcProxy();
   }
 
-  console.log("EVM Block Relay is running...");
+  console.log("EVM Supernode is running...");
 };
 
 Bootstrap()
