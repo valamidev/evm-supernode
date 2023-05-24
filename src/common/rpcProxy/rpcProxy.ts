@@ -56,23 +56,9 @@ export class RpcProxy {
 
       const requestId = uuidv4();
 
-      this.eventHandler.emit("rpcRequest", {
-        chainId: Number(params.id),
-        body,
-        requestId,
-      });
-
       let finished = 0;
 
-      this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
-        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
-
-        finished = 1;
-        res.send(data);
-        res.end();
-      });
-
-      setTimeout(() => {
+      const timeoutHandler = setTimeout(() => {
         if (finished === 1) {
           return;
         }
@@ -81,6 +67,21 @@ export class RpcProxy {
 
         this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
       }, 10000);
+
+      this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
+        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+
+        finished = 1;
+        clearTimeout(timeoutHandler);
+        res.send(data);
+        res.end();
+      });
+
+      this.eventHandler.emit("rpcRequest", {
+        chainId: Number(params.id),
+        body,
+        requestId,
+      });
     });
   }
 }
