@@ -55,20 +55,20 @@ export class DefaultChainHandler implements EvmChainHandler {
       this.RefreshProviders();
     }, 15000);
 
-    setInterval(() => {
-      try {
-        this.CalculateBlockLag();
-
-        if (this.blockLag > 1) {
-          this.RefreshProviders();
-        }
-      } catch (error) {
-        this.Logging(error);
-      }
-    }, this.blockTime * 30);
-
     if (this.realTimeBlockFetch) {
       this.FetchBlocks();
+
+      setInterval(() => {
+        try {
+          this.CalculateBlockLag();
+  
+          if (this.blockLag > 1) {
+            this.RefreshProviders();
+          }
+        } catch (error) {
+          this.Logging(error);
+        }
+      }, this.blockTime * 30);
     }
   }
 

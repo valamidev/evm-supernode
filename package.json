@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "ts-node ./src/index.ts",
-    "start": "tsc && node --inspect ./dist/src/index.js",
+    "start": "tsc && node ./dist/src/index.js",
     "start:docker": "node --max-old-space-size=350 ./dist/index.js",
     "build": "tsc",
     "docker": "docker build -t evm-supernode .",
