@@ -7,6 +7,8 @@ import {
   LessThanOrEqual,
 } from "typeorm";
 
+import Database from 'better-sqlite3';
+
 @Entity()
 @Index(["rpcAddress"], { unique: true })
 export class RpcNodes {
@@ -35,8 +37,9 @@ export class RpcNodes {
 export class NodeStorageRepository {
   private static instance: NodeStorageRepository;
   private data: DataSource;
+  private nativeDb: any;
 
-  private constructor() {}
+  private constructor() { }
 
   public static async init(): Promise<NodeStorageRepository> {
     if (!NodeStorageRepository.instance) {
@@ -58,13 +61,16 @@ export class NodeStorageRepository {
 
   public async connect() {
     this.data = new DataSource({
-      type: "sqlite",
+      type: "better-sqlite3",
       database: "nodeStore.sqlite",
       entities: [RpcNodes],
       synchronize: true,
     });
 
     await this.data.initialize();
+
+    this.nativeDb = new Database('nodeStore.sqlite');
+
   }
 
   async findStartNodes(chainId: number): Promise<RpcNodes[]> {
@@ -83,28 +89,37 @@ export class NodeStorageRepository {
     return this.data.manager.find(RpcNodes);
   }
 
+
   async upsert(node: RpcNodes, update = 0): Promise<void> {
+
     try {
-      if(update === 0) {
-        await this.data.manager.insert(RpcNodes, node);
+      if (update === 0) {
+        const insertQuery = this.nativeDb.prepare(`
+        INSERT INTO rpc_nodes (chainName, chainId, rpcAddress, latency, errorCount, rateLimit)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+
+        await insertQuery.run(node.chainName, node.chainId, node.rpcAddress, node.latency, node.errorCount, node.rateLimit);
       }
 
-      if(update === 1) {
-        await this.data.manager.update(
-          RpcNodes,
-          { rpcAddress: node.rpcAddress },
-          {
-            latency: node.latency,
-            errorCount: node.errorCount,
-            rateLimit: node.rateLimit,
-          }
-        );
+      if (update === 1) {
+        const updateQuery = this.nativeDb.prepare(`
+          UPDATE rpc_nodes
+          SET chainName = ?, chainId = ?, latency = ?, errorCount = ?, rateLimit = ?
+          WHERE rpcAddress = ?
+        `);
+
+        await updateQuery.run(node.chainName, node.chainId, node.latency, node.errorCount, node.rateLimit, node.rpcAddress);
       }
+
+
     } catch (error) {
-      if(update === 0){
+      if (update === 0) {
         return this.upsert(node, 1);
       }
+
       throw error;
     }
+
   }
 }

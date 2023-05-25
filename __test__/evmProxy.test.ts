@@ -9,7 +9,9 @@ describe("Evm Proxy Test", () => {
       const provider = new ethers.JsonRpcProvider("https://localhost/chain/56");
 
 
-      promises.push(provider.getFeeData())
+
+      promises.push(provider.getFeeData());
+
 
     }
   
