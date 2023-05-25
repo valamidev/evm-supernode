@@ -1,4 +1,3 @@
-import bodyParser from "body-parser";
 import express, { Express } from "express";
 import https from "https";
 import fs from "fs";
@@ -22,7 +21,7 @@ export class RpcProxy {
       cert: fs.readFileSync(path.resolve(process.cwd(), "./assets/cert.pem")),
     };
 
-    this.app.use(bodyParser.json());
+    this.app.use(express.json());
 
     if (process.env.STAGE === "dev") {
       this.app.use(morgan("dev"));
