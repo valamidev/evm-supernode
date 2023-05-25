@@ -9,13 +9,13 @@
   },
   "scripts": {
     "dev": "ts-node ./src/index.ts",
-    "start": "tsc && node  ./dist/src/index.js",
-    "start:docker": "node ./dist/index.js",
+    "start": "tsc && node ./dist/src/index.js",
+    "start:docker": "node --max-old-space-size=350 ./dist/index.js",
     "build": "tsc",
     "docker": "docker build -t evm-supernode .",
     "docker:tag": "docker tag evm-supernode valamidev/evm-supernode:latest",
     "docker:push": "docker push valamidev/evm-supernode:latest",
-    "docker:bump": "yarn run docker && yarn run docker:tag && yarn run docker:push",
+    "docker:bump": "yarn run build && yarn run docker && yarn run docker:tag && yarn run docker:push",
     "test": "jest"
   },
   "keywords": [],
