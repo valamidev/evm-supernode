@@ -83,19 +83,28 @@ export class NodeStorageRepository {
     return this.data.manager.find(RpcNodes);
   }
 
-  async upsert(node: RpcNodes): Promise<void> {
+  async upsert(node: RpcNodes, update = 0): Promise<void> {
     try {
-      await this.data.manager.insert(RpcNodes, node);
+      if(update === 0) {
+        await this.data.manager.insert(RpcNodes, node);
+      }
+
+      if(update === 1) {
+        await this.data.manager.update(
+          RpcNodes,
+          { rpcAddress: node.rpcAddress },
+          {
+            latency: node.latency,
+            errorCount: node.errorCount,
+            rateLimit: node.rateLimit,
+          }
+        );
+      }
     } catch (error) {
-      await this.data.manager.update(
-        RpcNodes,
-        { rpcAddress: node.rpcAddress },
-        {
-          latency: node.latency,
-          errorCount: node.errorCount,
-          rateLimit: node.rateLimit,
-        }
-      );
+      if(update === 0){
+        return this.upsert(node, 1);
+      }
+      throw error;
     }
   }
 }
