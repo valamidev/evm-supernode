@@ -227,27 +227,31 @@ export class EthereumAPI {
   }
 
   private async LogPerf(startTime: number) {
-    this.latency = Date.now() - startTime;
-    this.requestTimes.push(this.latency);
-
-    // Keep only the last 10 request times
-    if (this.requestTimes.length > 10) {
-      this.requestTimes.slice(-10);
+    try {
+      this.latency = Date.now() - startTime;
+      this.requestTimes.push(this.latency);
+  
+      // Keep only the last 10 request times
+      if (this.requestTimes.length > 10) {
+        this.requestTimes.slice(-10);
+      }
+  
+      const averageLatency =
+        this.requestTimes.reduce((sum, t) => sum + t, 0) /
+        this.requestTimes.length;
+  
+      
+      await this.storage
+        .upsert({
+          chainName: this.chainName,
+          chainId: this.chainId,
+          rpcAddress: this.endpointUrl,
+          latency: averageLatency,
+          errorCount: this.errorCount,
+          rateLimit: this.rateLimited,
+        });
+    } catch (error) {
+      console.log('LogPerf error:', error)
     }
-
-    const averageLatency =
-      this.requestTimes.reduce((sum, t) => sum + t, 0) /
-      this.requestTimes.length;
-
-    this.storage
-      .upsert({
-        chainName: this.chainName,
-        chainId: this.chainId,
-        rpcAddress: this.endpointUrl,
-        latency: averageLatency,
-        errorCount: this.errorCount,
-        rateLimit: this.rateLimited,
-      })
-      .catch((e) => console.log(e));
   }
 }
