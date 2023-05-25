@@ -15,6 +15,7 @@
     "docker": "docker build -t evm-supernode .",
     "docker:tag": "docker tag evm-supernode valamidev/evm-supernode:latest",
     "docker:push": "docker push valamidev/evm-supernode:latest",
+    "docker:bump": "yarn run docker && yarn run docker:tag && yarn run docker:push",
     "test": "jest"
   },
   "keywords": [],
