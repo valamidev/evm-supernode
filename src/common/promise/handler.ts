@@ -38,9 +38,5 @@ export const RequestMultiplePromisesWithTimeout = async (
     }
   }
 
-  timeoutPromises.forEach((promise) => {
-    promise.catch(() => {});
-  });
-
   return { success, error };
 };
