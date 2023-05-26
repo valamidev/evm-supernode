@@ -1,3 +1,5 @@
+import axios, { AxiosError } from 'axios';
+
 import { NodeStorageRepository } from "../../component/nodeStorage";
 import { RequestPromisesWithTimeout } from "../promise/handler";
 
@@ -21,22 +23,15 @@ export class EthereumAPI {
   public ProxyRequest = async (body: any) => {
     const startTime = Date.now();
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
-
     try {
-      const response = await fetch(this.endpointUrl, {
-        method: "POST",
+      const response = await axios.post(this.endpointUrl, body, {
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
-        signal: controller.signal,
+        timeout: this.maxRequestTime,
       });
 
-      clearTimeout(timeoutId);
-
-      const json = await response.json();
+      const json = response.data;
 
       this.HandleError(json);
 
@@ -44,8 +39,6 @@ export class EthereumAPI {
 
       return json;
     } catch (error) {
-      clearTimeout(timeoutId);
-
       this.errorCount++;
 
       throw error;

@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import compression from 'compression';
 import https from "https";
 import fs from "fs";
 import path from "path";
@@ -22,6 +23,7 @@ export class RpcProxy {
     };
 
     this.app.use(express.json());
+    this.app.use(compression());
 
     if (process.env.STAGE === "dev") {
       this.app.use(morgan("dev"));
