@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError } from "axios";
 
 import { NodeStorageRepository } from "../../component/nodeStorage";
 import { RequestPromisesWithTimeout } from "../promise/handler";
@@ -26,7 +26,7 @@ export class EthereumAPI {
     try {
       const response = await axios.post(this.endpointUrl, body, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         timeout: this.maxRequestTime,
       });
