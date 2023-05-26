@@ -2,21 +2,28 @@ export const RequestPromisesWithTimeout = async (
   promise: Promise<any>,
   timeout = 10000
 ): Promise<any> => {
-  return Promise.race([
-    promise,
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Promise timed out after ${timeout} ms`));
-      }, timeout);
-    }),
-  ]);
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`Promise timed out after ${timeout} ms`));
+    }, timeout);
+
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((reason) => {
+        clearTimeout(timer);
+        reject(reason);
+      });
+  });
 };
 
 export const RequestMultiplePromisesWithTimeout = async (
   promises: Promise<any>[],
   timeout = 10000
 ): Promise<{ success: any[]; error: any[] }> => {
-  const timeoutPromises = promises.map((promise) => 
+  const timeoutPromises = promises.map((promise) =>
     RequestPromisesWithTimeout(promise, timeout)
   );
 

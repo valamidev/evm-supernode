@@ -6,7 +6,7 @@ export class EthereumAPI {
   public latency: number = 0;
   public errorCount: number = 0;
   public rateLimited: number = 0;
-  private maxRequestTime: number = 1500;
+  private maxRequestTime: number = 5000;
   private requestTimes: number[] = [];
 
   constructor(
@@ -21,16 +21,13 @@ export class EthereumAPI {
     const startTime = Date.now();
 
     try {
-      const response = await RequestPromisesWithTimeout(
-        fetch(this.endpointUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }),
-        this.maxRequestTime
-      );
+      const response = await fetch(this.endpointUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
       const json = await response.json();
 
@@ -230,28 +227,26 @@ export class EthereumAPI {
     try {
       this.latency = Date.now() - startTime;
       this.requestTimes.push(this.latency);
-  
+
       // Keep only the last 10 request times
       if (this.requestTimes.length > 10) {
         this.requestTimes.slice(-10);
       }
-  
+
       const averageLatency =
         this.requestTimes.reduce((sum, t) => sum + t, 0) /
         this.requestTimes.length;
-  
-      
-      await this.storage
-        .upsert({
-          chainName: this.chainName,
-          chainId: this.chainId,
-          rpcAddress: this.endpointUrl,
-          latency: averageLatency,
-          errorCount: this.errorCount,
-          rateLimit: this.rateLimited,
-        });
+
+      await this.storage.upsert({
+        chainName: this.chainName,
+        chainId: this.chainId,
+        rpcAddress: this.endpointUrl,
+        latency: averageLatency,
+        errorCount: this.errorCount,
+        rateLimit: this.rateLimited,
+      });
     } catch (error) {
-      console.log('LogPerf error:', error)
+      console.log("LogPerf error:", error);
     }
   }
 }
