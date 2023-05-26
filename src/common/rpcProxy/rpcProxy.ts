@@ -1,5 +1,5 @@
 import express, { Express } from "express";
-import compression from 'compression';
+import compression from "compression";
 import https from "https";
 import fs from "fs";
 import path from "path";
@@ -49,44 +49,58 @@ export class RpcProxy {
     });
 
     this.app.post("/chain/:id", async (req, res) => {
-      const { method, headers, body, params } = req;
-
-      if (process.env.STAGE === "dev") {
-        console.log({ method, params, headers, body });
-      }
-
-      const requestId = uuidv4();
-
       let finished = 0;
 
-      const timeoutHandler = setTimeout(() => {
-        if (finished === 1) {
-          return;
+      try {
+        const { method, headers, body, params } = req;
+
+        if (process.env.STAGE === "dev") {
+          console.log({ method, params, headers, body });
         }
-        res.status(500).send("Request timeout");
-        req.destroy();
-        res.end();
 
-        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+        const requestId = uuidv4();
 
-        return;
-      }, 10000);
+        const timeoutHandler = setTimeout(() => {
+          if (finished === 1) {
+            return;
+          }
+          finished = 1;
 
-      this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
-        this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+          res.status(500).send("Request timeout");
+          req.destroy();
+          res.end();
 
+          this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+
+          return;
+        }, 10000);
+
+        this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
+          if (finished === 1) {
+            return;
+          }
+          finished = 1;
+
+          this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+
+          clearTimeout(timeoutHandler);
+          res.send(data);
+          res.end();
+          return;
+        });
+
+        this.eventHandler.emit("rpcRequest", {
+          chainId: Number(params.id),
+          body,
+          requestId,
+        });
+      } catch (error) {
         finished = 1;
-        clearTimeout(timeoutHandler);
-        res.send(data);
-        res.end();
-        return;
-      });
 
-      this.eventHandler.emit("rpcRequest", {
-        chainId: Number(params.id),
-        body,
-        requestId,
-      });
+        console.log("Proxy response error", error);
+
+        res.status(500).send("Request failed");
+      }
     });
   }
 }
