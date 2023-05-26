@@ -8,6 +8,7 @@ export class EthereumAPI {
   public rateLimited: number = 0;
   private maxRequestTime: number = 5000;
   private requestTimes: number[] = [];
+  private loggingBusy: boolean = false;
 
   constructor(
     public endpointUrl: string,
@@ -225,6 +226,12 @@ export class EthereumAPI {
 
   private async LogPerf(startTime: number) {
     try {
+      if (this.loggingBusy) {
+        return;
+      }
+
+      this.loggingBusy = true;
+
       this.latency = Date.now() - startTime;
       this.requestTimes.push(this.latency);
 
@@ -247,6 +254,8 @@ export class EthereumAPI {
       });
     } catch (error) {
       console.log("LogPerf error:", error);
+    } finally {
+      this.loggingBusy = false;
     }
   }
 }
