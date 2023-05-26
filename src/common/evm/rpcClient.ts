@@ -21,6 +21,9 @@ export class EthereumAPI {
   public ProxyRequest = async (body: any) => {
     const startTime = Date.now();
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const response = await fetch(this.endpointUrl, {
         method: "POST",
@@ -28,7 +31,10 @@ export class EthereumAPI {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const json = await response.json();
 
@@ -38,6 +44,8 @@ export class EthereumAPI {
 
       return json;
     } catch (error) {
+      clearTimeout(timeoutId);
+
       this.errorCount++;
 
       throw error;

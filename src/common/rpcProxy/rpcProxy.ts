@@ -63,8 +63,11 @@ export class RpcProxy {
         }
         res.status(500).send("Request timeout");
         req.destroy();
+        res.end();
 
         this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
+
+        return;
       }, 10000);
 
       this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
@@ -74,6 +77,7 @@ export class RpcProxy {
         clearTimeout(timeoutHandler);
         res.send(data);
         res.end();
+        return;
       });
 
       this.eventHandler.emit("rpcRequest", {

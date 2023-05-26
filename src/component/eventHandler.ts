@@ -1,10 +1,15 @@
-import { EventEmitter } from "eventemitter3";
+import EventEmitter from "node:events";
+
 
 export class EventHandler extends EventEmitter {
   private static instance: EventHandler;
 
   private constructor() {
     super();
+
+    this.on('error', (err) => {
+      console.error('EventEmitter error: ', err);
+    });
   }
 
   public static getInstance(): EventHandler {
