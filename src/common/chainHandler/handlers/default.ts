@@ -61,7 +61,7 @@ export class DefaultChainHandler implements EvmChainHandler {
       setInterval(() => {
         try {
           this.CalculateBlockLag();
-  
+
           if (this.blockLag > 1) {
             this.RefreshProviders();
           }
@@ -328,7 +328,10 @@ export class DefaultChainHandler implements EvmChainHandler {
       );
 
       if (availableProviders.length < 1) {
-        this.Logging(this.chainName, "RefreshProviders done");
+        this.Logging(
+          this.chainName,
+          "RefreshProviders done, no available provider"
+        );
         return;
       }
 
@@ -369,7 +372,7 @@ export class DefaultChainHandler implements EvmChainHandler {
 
         const chainId = await nextProvider.getChainId();
 
-        if (chainId !== this.chainId) {
+        if (chainId === this.chainId) {
           this.providers.pop();
 
           this.providers.push(nextProvider);
