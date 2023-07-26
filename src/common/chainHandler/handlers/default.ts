@@ -1,7 +1,10 @@
 import { EventHandler } from "../../../component/eventHandler";
 import { ChainConfig, Config } from "../../config";
 import { EthereumAPI } from "../../evm/rpcClient";
-import { RequestMultiplePromisesWithTimeout } from "../../promise/handler";
+import {
+  RequestMultiplePromisesWithTimeout,
+  RequestPromisesWithTimeout,
+} from "../../promise/handler";
 import { GetConsensusValue } from "../../utilts";
 import { EvmChainHandler } from "../interface";
 
@@ -75,21 +78,41 @@ export class DefaultChainHandler implements EvmChainHandler {
   private async ProxyRequestHandlerInit() {
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
-        const promises = this.providers.map((provider) => {
-          return provider.ProxyRequest(data.body);
-        });
+        let response = undefined;
 
-        const { success, error } = await RequestMultiplePromisesWithTimeout(
-          promises,
-          this.maxProxyRequestTime
-        );
+        // Fast Track
+        try {
+          const fastProvider = this.GetFastestProvider();
 
-        if (success[0]) {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, success[0]);
+          const result = await RequestPromisesWithTimeout(
+            fastProvider.ProxyRequest(data.body),
+            this.maxRequestTime
+          );
+
+          response = result;
+        } catch (error) {
+          console.log("ProxyRequestHandler Fast Track failed", error);
+        }
+
+        if (!response) {
+          const promises = this.providers.map((provider) => {
+            return provider.ProxyRequest(data.body);
+          });
+
+          const { success, error } = await RequestMultiplePromisesWithTimeout(
+            promises,
+            this.maxProxyRequestTime
+          );
+
+          response = success[0];
+        }
+
+        if (response) {
+          this.eventHandler.emit(`rpcResponse:${data.requestId}`, response);
         } else {
           this.eventHandler.emit(`rpcResponse:${data.requestId}`, {
             jsonrpc: "2.0",
-            id: 1,
+            id: null,
             error: {
               code: -32603,
               message: "RPC-proxy error",
