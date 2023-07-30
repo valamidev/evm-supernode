@@ -13,13 +13,13 @@ export const fetchExtraRpcs = async () => {
 
       const rpcList = eval("(" + match[1] + ")");
 
-      rpcList["1"].push({
+      rpcList["1"].rpcs.push({
         url: "https://eth.llamarpc.com",
         tracking: "none",
         trackingDetails: "privacyStatement",
       });
 
-      rpcList["137"].push({
+      rpcList["137"].rpcs.push({
         url: "https://polygon.llamarpc.com",
         tracking: "none",
         trackingDetails: "privacyStatement",
@@ -48,13 +48,13 @@ export const fetchExtraRpcs = async () => {
 
       const rpcList = eval("(" + match[1] + ")");
 
-      rpcList["1"].push({
+      rpcList["1"].rpcs.push({
         url: "https://eth.llamarpc.com",
         tracking: "none",
         trackingDetails: "privacyStatement",
       });
 
-      rpcList["137"].push({
+      rpcList["137"].rpcs.push({
         url: "https://polygon.llamarpc.com",
         tracking: "none",
         trackingDetails: "privacyStatement",
