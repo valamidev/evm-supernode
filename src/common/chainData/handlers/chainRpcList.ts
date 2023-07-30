@@ -13,6 +13,18 @@ export const fetchExtraRpcs = async () => {
 
       const rpcList = eval("(" + match[1] + ")");
 
+      rpcList["1"].push({
+        url: "https://eth.llamarpc.com",
+        tracking: "none",
+        trackingDetails: "privacyStatement",
+      });
+
+      rpcList["137"].push({
+        url: "https://polygon.llamarpc.com",
+        tracking: "none",
+        trackingDetails: "privacyStatement",
+      });
+
       return rpcList;
     } else {
       console.log("Extra RPCs not found in file.");
@@ -35,6 +47,18 @@ export const fetchExtraRpcs = async () => {
       var privacyStatement = {};
 
       const rpcList = eval("(" + match[1] + ")");
+
+      rpcList["1"].push({
+        url: "https://eth.llamarpc.com",
+        tracking: "none",
+        trackingDetails: "privacyStatement",
+      });
+
+      rpcList["137"].push({
+        url: "https://polygon.llamarpc.com",
+        tracking: "none",
+        trackingDetails: "privacyStatement",
+      });
 
       return rpcList;
     } else {
