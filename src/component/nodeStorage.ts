@@ -24,7 +24,7 @@ export class RpcNodes {
   @Column({ default: 0 })
   totalRequest: number;
 
-  @Column({ default: 1 })
+  @Column({ default: 1, type: "float" })
   successRate: number;
 
   @Column()
