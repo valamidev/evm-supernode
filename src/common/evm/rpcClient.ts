@@ -253,7 +253,8 @@ export class EthereumAPI {
         chainName: this.chainName,
         chainId: this.chainId,
         totalRequest: this.totalRequests,
-        successRate: this.totalRequests - this.errorCount / this.totalRequests,
+        successRate:
+          (this.totalRequests - this.errorCount) / this.totalRequests,
         rpcAddress: this.endpointUrl,
         latency: averageLatency,
         errorCount: this.errorCount,
