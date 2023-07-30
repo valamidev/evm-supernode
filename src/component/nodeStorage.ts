@@ -21,6 +21,12 @@ export class RpcNodes {
   @Column()
   chainId: number;
 
+  @Column({ default: 0 })
+  totalRequest: number;
+
+  @Column({ default: 1 })
+  successRate: number;
+
   @Column()
   rpcAddress: string;
 
@@ -92,14 +98,16 @@ export class NodeStorageRepository {
     try {
       if (update === 0) {
         const insertQuery = this.nativeDb.prepare(`
-        REPLACE INTO rpc_nodes (chainName, chainId, rpcAddress, latency, errorCount, rateLimit)
-        VALUES (?, ?, ?, ?, ?, ?)
+        REPLACE INTO rpc_nodes (chainName, chainId, rpcAddress, totalRequest, successRate, latency, errorCount, rateLimit)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
         await insertQuery.run(
           node.chainName,
           node.chainId,
           node.rpcAddress,
+          node.totalRequest,
+          node.successRate,
           node.latency,
           node.errorCount,
           node.rateLimit

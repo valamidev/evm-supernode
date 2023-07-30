@@ -6,6 +6,7 @@ import { RequestPromisesWithTimeout } from "../promise/handler";
 export class EthereumAPI {
   private storage: NodeStorageRepository;
   public latency: number = 0;
+  public totalRequests: number = 0;
   public errorCount: number = 0;
   public rateLimited: number = 0;
   private maxRequestTime: number = 5000;
@@ -22,6 +23,7 @@ export class EthereumAPI {
 
   public ProxyRequest = async (body: any) => {
     const startTime = Date.now();
+    this.totalRequests++;
 
     try {
       const response = await axios.post(this.endpointUrl, body, {
@@ -49,6 +51,7 @@ export class EthereumAPI {
     requests: { method: string; params: any[] }[]
   ) {
     const startTime = Date.now();
+    this.totalRequests++;
 
     try {
       const response = await RequestPromisesWithTimeout(
@@ -85,6 +88,7 @@ export class EthereumAPI {
 
   private async MakeRequest(method: string, params: any[]) {
     const startTime = Date.now();
+    this.totalRequests++;
 
     try {
       const response = await fetch(this.endpointUrl, {
@@ -248,6 +252,8 @@ export class EthereumAPI {
       await this.storage.upsert({
         chainName: this.chainName,
         chainId: this.chainId,
+        totalRequest: this.totalRequests,
+        successRate: this.totalRequests - this.errorCount / this.totalRequests,
         rpcAddress: this.endpointUrl,
         latency: averageLatency,
         errorCount: this.errorCount,
