@@ -1,5 +1,3 @@
-import axios, { AxiosError } from "axios";
-
 import { NodeStorageRepository } from "../../component/nodeStorage";
 import { RequestPromisesWithTimeout } from "../promise/handler";
 
@@ -26,14 +24,16 @@ export class EthereumAPI {
     this.totalRequests++;
 
     try {
-      const response = await axios.post(this.endpointUrl, body, {
+      const response = await fetch(this.endpointUrl, {
+        method: "POST",
+        body: JSON.stringify(body),
         headers: {
           "Content-Type": "application/json",
         },
-        timeout: this.maxRequestTime,
+        signal: AbortSignal.timeout(this.maxRequestTime),
       });
 
-      const json = response.data;
+      const json = await response.json();
 
       this.HandleError(json);
 
@@ -230,11 +230,11 @@ export class EthereumAPI {
   }
 
   private async LogPerf(startTime: number) {
-    try {
-      if (this.loggingBusy) {
-        return;
-      }
+    if (this.loggingBusy) {
+      return;
+    }
 
+    try {
       this.loggingBusy = true;
 
       this.latency = Date.now() - startTime;
@@ -260,6 +260,9 @@ export class EthereumAPI {
         errorCount: this.errorCount,
         rateLimit: this.rateLimited,
       });
+
+      // Wait 5 seconds before logging again
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (error) {
       console.log("LogPerf error:", error);
     } finally {
