@@ -322,18 +322,7 @@ export class DefaultChainHandler implements EvmChainHandler {
     this.Logging(this.chainName, "blockTime set to: ", blockTime, " second");
 
     // BlockTime is UnixTimeStamp
-    this.blockTime = blockTime * 1000;
-
-    if (this.blockTime > 0) {
-      this.intervalHandler = setInterval(async () => {
-        try {
-          await this.GetBlockFull(this.latestBlock);
-          this.latestBlock = this.latestBlock + 1;
-        } catch (error) {
-          this.Logging(error);
-        }
-      }, this.blockTime);
-    }
+    this.blockTime = Math.max(1000, blockTime * 1000);
   }
 
   private GetFastestProvider() {
