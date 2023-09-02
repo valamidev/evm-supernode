@@ -6,7 +6,7 @@
     "loggingEnabled": false,
     "blockStoreEnabled": false,
     "nodeStorage": true,
-    "enableWhitelist": false,
+    "enableWhitelist": true,
     "whitelistChains": [1,25,56,137,250,2000,42161,43114],
     "chainConfigs": {
         "1": {
