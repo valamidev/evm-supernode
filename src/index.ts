@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import fs from "fs";
+
 import WebSocket from "ws";
 import { ChainDataService } from "./common/chainData/chainData";
 import { ChainHandler } from "./common/chainHandler/chainHandler";
 import { EventHandler } from "./component/eventHandler";
 import { Config } from "./common/config";
 
-import { Level } from "level";
 import { NodeStorageRepository } from "./component/nodeStorage";
 import { RpcProxy } from "./common/rpcProxy/rpcProxy";
 
@@ -54,13 +55,19 @@ const Bootstrap = async () => {
   }
 
   if (config.blockStoreEnabled) {
-    const db = new Level("blockStore", {
-      valueEncoding: "json",
-      maxFileSize: 128 * 1024 * 1024,
-    });
-
     eventHandler.on("newBlock", async (data) => {
-      await db.put(`${data.chainId}:${data.blockNumber}`, data);
+      const dir = `blocks/${data.chainId}`;
+      const filename = `${dir}/${data.blockNumber}.json`;
+
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      fs.writeFile(filename, JSON.stringify(data), (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
     });
   }
 
