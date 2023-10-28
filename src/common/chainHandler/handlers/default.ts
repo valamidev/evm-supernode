@@ -185,8 +185,10 @@ export class DefaultChainHandler implements EvmChainHandler {
         await this.GetNextBlock(this.latestBlock);
       }
     } catch (error) {
-      this.Logging(error, "Timeout", this.blockTime);
-      await new Promise((resolve) => setTimeout(resolve, this.blockTime));
+      const sleepTime = Math.max(1000, this.blockTime / 2);
+
+      this.Logging(error, "Timeout", sleepTime);
+      await new Promise((resolve) => setTimeout(resolve, sleepTime));
     } finally {
       return this.FetchBlocks();
     }
