@@ -200,32 +200,54 @@ export class EthereumAPI {
   }
 
   private HandleError(json: any) {
-    if (!json.error) return;
+    // Case when it is not a batch request
+    if (!json[0]) {
+      if (!json.error) return;
+    }
+
+    if (json[0]) {
+      for (const iterator of Object.keys(json)) {
+        this.parseError(json[iterator]);
+      }
+    }
+  }
+
+  private parseError(payload: any) {
+    if (!payload.error) return;
 
     this.errorCount++;
 
     let knownError = false;
 
-    if (json.error.message?.includes("usage limit")) {
+    if (payload.error.message?.includes("usage limit")) {
       this.rateLimited++;
       knownError = true;
     }
 
-    if (json.error.message?.includes("limit exceeded")) {
-      this.rateLimited++;
-      knownError = true;
-    }
-    if (json.error.message?.includes("reached")) {
-      this.rateLimited++;
-      knownError = true;
-    }
-    if (json.error.message?.includes("Too Many Requests")) {
+    if (
+      payload.error.message?.includes(
+        "Please specify an address in your request"
+      )
+    ) {
       this.rateLimited++;
       knownError = true;
     }
 
-    if (json.error.message) {
-      throw new Error("RPC Error: " + json.error.message);
+    if (payload.error.message?.includes("limit exceeded")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+    if (payload.error.message?.includes("reached")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+    if (payload.error.message?.includes("Too Many Requests")) {
+      this.rateLimited++;
+      knownError = true;
+    }
+
+    if (payload.error.message) {
+      throw new Error("RPC Error: " + payload.error.message);
     }
   }
 

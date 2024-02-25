@@ -1,45 +1,46 @@
 {
-    "proxyEnabled": true,
-    "realTimeBlockFetch": false,
-    "websocketEnabled": false,
-    "websocketPort": 8080,
-    "loggingEnabled": false,
-    "blockStoreEnabled": false,
-    "nodeStorage": true,
-    "enableWhitelist": true,
-    "whitelistChains": [1,25,56,137,250,2000,42161,43114],
-    "chainConfigs": {
-        "1": {
-            "name": "Ethereum",
-            "blockTimeMs": 12000
-        },
-        "25": {
-            "name": "Cronos",
-            "blockTimeMs": 5000
-        },
-        "56": {
-            "name": "Binance Smart Chain",
-            "blockTimeMs": 3000
-        },
-        "137": {
-            "name": "Polygon",
-            "blockTimeMs": 2000
-        },
-        "250": {
-            "name": "Fantom",
-            "blockTimeMs": 1000
-        },
-        "2000": {
-            "name": "Dogechain",
-            "blockTimeMs": 2000
-        },
-        "42161": {
-            "name": "Arbitrum One",
-            "blockTimeMs": 300
-        },
-        "43114": {
-            "name": "Avax C-Chain",
-            "blockTimeMs": 1000
-        }
+  "proxyEnabled": true,
+  "realTimeBlockFetch": false,
+  "websocketEnabled": false,
+  "websocketPort": 8080,
+  "loggingEnabled": false,
+  "logLevel": 0,
+  "blockStoreEnabled": false,
+  "nodeStorage": true,
+  "enableWhitelist": true,
+  "whitelistChains": [1, 25, 56, 137, 250, 2000, 42161, 43114],
+  "chainConfigs": {
+    "1": {
+      "name": "Ethereum",
+      "blockTimeMs": 12000
+    },
+    "25": {
+      "name": "Cronos",
+      "blockTimeMs": 5000
+    },
+    "56": {
+      "name": "Binance Smart Chain",
+      "blockTimeMs": 3000
+    },
+    "137": {
+      "name": "Polygon",
+      "blockTimeMs": 2000
+    },
+    "250": {
+      "name": "Fantom",
+      "blockTimeMs": 1000
+    },
+    "2000": {
+      "name": "Dogechain",
+      "blockTimeMs": 2000
+    },
+    "42161": {
+      "name": "Arbitrum One",
+      "blockTimeMs": 300
+    },
+    "43114": {
+      "name": "Avax C-Chain",
+      "blockTimeMs": 1000
     }
+  }
 }

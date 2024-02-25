@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { LogLevel } from "../constraints";
 
 export class ChainConfig {
   name?: string;
@@ -14,6 +15,7 @@ export class ConfigInterface {
   public websocketPort?: number;
   public blockStoreEnabled?: boolean;
   public loggingEnabled?: boolean;
+  public logLevel?: number;
   public enableWhitelist?: boolean;
   public whitelistChains?: number[];
   public chainConfigs?: {

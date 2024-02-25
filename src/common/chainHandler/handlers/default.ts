@@ -1,4 +1,5 @@
 import { EventHandler } from "../../../component/eventHandler";
+import { LogLevel } from "../../../constraints";
 import { ChainConfig, Config } from "../../config";
 import { EthereumAPI } from "../../evm/rpcClient";
 import {
@@ -22,6 +23,7 @@ export class DefaultChainHandler implements EvmChainHandler {
   private readonly eventHandler: EventHandler;
   private readonly config?: ChainConfig;
   private readonly logging: boolean | undefined;
+  private readonly logLevel: number;
 
   constructor(
     private chainId: number,
@@ -31,6 +33,7 @@ export class DefaultChainHandler implements EvmChainHandler {
   ) {
     this.eventHandler = EventHandler.getInstance();
     this.logging = Config.load()?.loggingEnabled;
+    this.logLevel = Config.load()?.logLevel ?? 0;
 
     this.config = Config.load()?.chainConfigs?.[chainId] as ChainConfig;
 
@@ -89,9 +92,19 @@ export class DefaultChainHandler implements EvmChainHandler {
             this.maxRequestTime
           );
 
+          if (result && result.error) {
+            throw new Error(result.error.message);
+          }
+
+          if (result[0] && result[0]?.error) {
+            throw new Error(result[0]?.error?.message || "Unknown error");
+          }
+
           response = result;
         } catch (error) {
-          console.log("ProxyRequestHandler Fast Track failed", error);
+          if (this.logLevel >= LogLevel.Trace) {
+            this.Logging("ProxyRequestHandler Fast Track failed", error);
+          }
         }
 
         if (!response) {

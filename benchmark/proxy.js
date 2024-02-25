@@ -3,7 +3,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const ethers = require("ethers");
 
 const batchSize = 10;
-const numRequests = 50;
+const numRequests = 50000;
 const chainId = 56; // replace with the desired chain ID
 
 async function makeRequests() {
@@ -15,6 +15,9 @@ async function makeRequests() {
       const provider = new ethers.JsonRpcProvider(
         `https://localhost/chain/${chainId}`
       );
+
+      //  requests.push(provider.getFeeData());
+
       requests.push(
         provider.getLogs({
           fromBlock: "latest",
