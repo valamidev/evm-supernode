@@ -1,4 +1,3 @@
-import { Level } from "level";
 import { EthereumAPI } from "./rpcClient";
 
 describe("RpcClient", () => {
