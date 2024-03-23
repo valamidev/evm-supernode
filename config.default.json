@@ -8,7 +8,7 @@
   "blockStoreEnabled": false,
   "nodeStorage": true,
   "enableWhitelist": true,
-  "whitelistChains": [1, 25, 56, 137, 250, 2000, 42161, 43114],
+  "whitelistChains": [1, 25, 56, 137, 250, 2000, 8453, 42161, 43114],
   "chainConfigs": {
     "1": {
       "name": "Ethereum",
@@ -32,6 +32,10 @@
     },
     "2000": {
       "name": "Dogechain",
+      "blockTimeMs": 2000
+    },
+    "8453": {
+      "name": "Base",
       "blockTimeMs": 2000
     },
     "42161": {
