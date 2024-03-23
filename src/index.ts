@@ -54,48 +54,15 @@ const Bootstrap = async () => {
     console.log("Websocket is running...");
   }
 
-  if (config.blockStoreEnabled) {
-    eventHandler.on("newBlock", async (data) => {
-      const dir = `blocks/${data.chainId}`;
-      const filename = `${dir}/${data.blockNumber}.json`;
-
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-
-      fs.writeFile(filename, JSON.stringify(data), (err) => {
-        if (err) {
-          console.log(err);
-        }
-      });
-    });
-  }
-
   for (const chain of chainData) {
-    if (config.enableWhitelist) {
-      if (config.whitelistChains?.includes(chain.chainId)) {
-        const startNodes = await nodeStorage.findStartNodes(chain.chainId);
+    const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
-        const listener = ChainHandler.init(
-          chain.chainId,
-          chain.name,
-          [...startNodes.map((e) => e.rpcAddress), ...chain.rpcs],
-          config.realTimeBlockFetch
-        );
+    const listener = ChainHandler.init(chain.chainId, chain.name, [
+      ...startNodes.map((e) => e.rpcAddress),
+      ...chain.rpcs,
+    ]);
 
-        listener.Start();
-        continue;
-      }
-    } else {
-      const startNodes = await nodeStorage.findStartNodes(chain.chainId);
-
-      const listener = ChainHandler.init(chain.chainId, chain.name, [
-        ...startNodes.map((e) => e.rpcAddress),
-        ...chain.rpcs,
-      ]);
-
-      listener.Start();
-    }
+    listener.Start();
   }
 
   if (config.proxyEnabled) {

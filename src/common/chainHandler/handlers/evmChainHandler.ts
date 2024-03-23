@@ -1,15 +1,13 @@
 import { EventHandler } from "../../../component/eventHandler";
-import { LogLevel } from "../../../constraints";
-import { ChainConfig, Config } from "../../config";
+import { LogLevel, MINUTE_IN_MS, SECOND_IN_MS } from "../../../constraints";
+import { Config } from "../../config";
 import { EthereumAPI } from "../../evm/rpcClient";
 import {
   RequestMultiplePromisesWithTimeout,
   RequestPromisesWithTimeout,
 } from "../../promise/handler";
-import { GetConsensusValue } from "../../utilts";
-import { EvmChainHandler } from "../interface";
 
-export class DefaultChainHandler implements EvmChainHandler {
+export class EvmChainHandler {
   private readonly maxProviderCount = 5;
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
@@ -17,29 +15,20 @@ export class DefaultChainHandler implements EvmChainHandler {
   private maxRequestTime: number = 1500;
   private maxProxyRequestTime: number = 5000;
   private latestBlock: number = 0;
-  private blockLag: number = 0;
-  private blockTime: number = 15 * 1000; // ETH default block time
-  private intervalHandler!: NodeJS.Timer;
+
   private readonly eventHandler: EventHandler;
-  private readonly config?: ChainConfig;
   private readonly logging: boolean | undefined;
   private readonly logLevel: number;
+  private lastRequestTime: number = 0;
 
   constructor(
     private chainId: number,
     private chainName: string,
-    private rpcs: string[],
-    private realTimeBlockFetch = true
+    private rpcs: string[]
   ) {
     this.eventHandler = EventHandler.getInstance();
     this.logging = Config.load()?.loggingEnabled;
     this.logLevel = Config.load()?.logLevel ?? 0;
-
-    this.config = Config.load()?.chainConfigs?.[chainId] as ChainConfig;
-
-    if (this.config?.blockTimeMs) {
-      this.blockTime = this.config.blockTimeMs;
-    }
 
     this.ProxyRequestHandlerInit();
     this.LoadProviders();
@@ -47,40 +36,18 @@ export class DefaultChainHandler implements EvmChainHandler {
   }
 
   public Start() {
-    if (!this.config?.blockTimeMs) {
-      setTimeout(async () => {
-        try {
-          await this.CalculateBlockTime();
-        } catch (error) {
-          this.Logging(error);
-        }
-      }, 1000 * Math.random());
-    }
-
     setInterval(() => {
-      this.RefreshProviders();
-    }, 15000);
-
-    if (this.realTimeBlockFetch) {
-      this.FetchBlocks();
-
-      setInterval(() => {
-        try {
-          this.CalculateBlockLag();
-
-          if (this.blockLag > 1) {
-            this.RefreshProviders();
-          }
-        } catch (error) {
-          this.Logging(error);
-        }
-      }, this.blockTime * 30);
-    }
+      if (this.lastRequestTime > Date.now() - MINUTE_IN_MS) {
+        this.RefreshProviders();
+      }
+    }, 15 * SECOND_IN_MS);
   }
 
   private async ProxyRequestHandlerInit() {
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
+        this.lastRequestTime = Date.now();
+
         let response = undefined;
 
         // Fast Track
@@ -178,166 +145,9 @@ export class DefaultChainHandler implements EvmChainHandler {
           }
         });
       }
-    });
-  }
 
-  async FetchBlocks(): Promise<void> {
-    if (this.providers.length === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      return this.FetchBlocks();
-    }
-
-    try {
-      if (this.latestBlock === 0) {
-        await this.GetBlockNumber();
-      }
-
-      if (this.blockLag > 2 && this.GetFastestProvider()) {
-        await this.GetNextBlock(this.latestBlock, this.GetFastestProvider());
-      } else {
-        await this.GetNextBlock(this.latestBlock);
-      }
-    } catch (error) {
-      const sleepTime = Math.max(1000, this.blockTime / 2);
-
-      this.Logging(error, "Timeout", sleepTime);
-      await new Promise((resolve) => setTimeout(resolve, sleepTime));
-    } finally {
-      return this.FetchBlocks();
-    }
-  }
-
-  async GetNextBlock(blockNumber: number, forcedProvider?: EthereumAPI) {
-    const time = Date.now();
-
-    const blockFull = await this.GetBlockFull(blockNumber + 1, forcedProvider);
-
-    if (blockFull.blockNumber > this.latestBlock) {
-      this.Logging(
-        "New block found",
-        this.chainName,
-        this.latestBlock,
-        forcedProvider ? "fast track" : "",
-        {
-          requestTime: Date.now() - time,
-          txCount: blockFull.transactions.length,
-          logsCount: blockFull.txLogs.length,
-        }
-      );
-      this.latestBlock = blockFull.blockNumber;
-    }
-
-    if (Date.now() - time > this.maxRequestTime) {
       this.RefreshProviders();
-    }
-
-    this.eventHandler.EmitBlock({
-      ...blockFull,
     });
-  }
-
-  async GetBlockFull(blockNumber: number, forcedProvider?: EthereumAPI) {
-    try {
-      if (forcedProvider) {
-        return forcedProvider.getFullBlock(blockNumber);
-      }
-
-      const promises = this.providers.map((provider) => {
-        return provider.getFullBlock(blockNumber);
-      });
-
-      const { success, error } = await RequestMultiplePromisesWithTimeout(
-        promises,
-        this.maxRequestTime
-      );
-
-      const validated = success
-        .filter(
-          (e) => e?.number && e?.timestamp && e?.transactions && e?.txLogs
-        )
-        .sort((a, b) => b.txLogs?.length - a.txLogs?.length);
-
-      const bestBlock = validated.find(
-        (block) =>
-          block?.number &&
-          block?.timestamp &&
-          block?.transactions?.length > 0 &&
-          block?.txLogs?.length > 0
-      );
-
-      if (bestBlock) {
-        return bestBlock;
-      }
-
-      if (validated[0]) {
-        return validated[0];
-      }
-    } catch (error) {
-      this.Logging("GetBlockFull error: ", error);
-    }
-
-    throw new Error(`No valid block found! Chain: ${this.chainName}`);
-  }
-
-  async CalculateBlockLag() {
-    const promises = this.providers.map((provider) => {
-      return provider.getBlockNumber();
-    });
-
-    const { success, error } = await RequestMultiplePromisesWithTimeout(
-      promises,
-      this.maxRequestTime
-    );
-
-    const latestBlock = GetConsensusValue(success);
-
-    if (latestBlock) {
-      this.blockLag = latestBlock - this.latestBlock;
-    }
-
-    this.Logging(`BlockLag on ${this.chainName}: `, this.blockLag, "block");
-  }
-
-  async GetBlockNumber() {
-    const promises = this.providers.map((provider) => {
-      return provider.getBlockNumber();
-    });
-
-    const { success, error } = await RequestMultiplePromisesWithTimeout(
-      promises,
-      this.maxRequestTime
-    );
-
-    const latestBlock = GetConsensusValue(success);
-
-    if (latestBlock) {
-      this.latestBlock = GetConsensusValue(success);
-    } else {
-      console.error("Error: ", "Cannot GetConsensusValue latestBlock");
-    }
-
-    this.Logging(
-      "chainName ",
-      this.chainName,
-      success,
-      GetConsensusValue(success)
-    );
-  }
-
-  async CalculateBlockTime() {
-    await this.GetBlockNumber();
-
-    const blockNumber = this.latestBlock;
-
-    const latestBlock = await this.GetBlockFull(blockNumber);
-    const prevBlock = await this.GetBlockFull(blockNumber - 1);
-
-    const blockTime = latestBlock.blockTimestamp - prevBlock.blockTimestamp;
-
-    this.Logging(this.chainName, "blockTime set to: ", blockTime, " second");
-
-    // BlockTime is UnixTimeStamp
-    this.blockTime = Math.max(1000, blockTime * 1000);
   }
 
   private GetFastestProvider() {

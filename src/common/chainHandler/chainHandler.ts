@@ -1,5 +1,4 @@
-import { DefaultChainHandler } from "./handlers/default";
-import { EvmChainHandler } from "./interface";
+import { EvmChainHandler } from "./handlers/evmChainHandler";
 
 export class ChainHandler {
   constructor() {}
@@ -7,24 +6,8 @@ export class ChainHandler {
   static init(
     chainId: number,
     chainName: string,
-    rpcs: string[],
-    realTimeBlockFetch = true
+    rpcs: string[]
   ): EvmChainHandler {
-    switch (chainId) {
-      case 42161: // Arbitrum
-        return new DefaultChainHandler(
-          chainId,
-          chainName,
-          rpcs,
-          realTimeBlockFetch
-        );
-      default:
-        return new DefaultChainHandler(
-          chainId,
-          chainName,
-          rpcs,
-          realTimeBlockFetch
-        );
-    }
+    return new EvmChainHandler(chainId, chainName, rpcs);
   }
 }

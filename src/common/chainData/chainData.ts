@@ -58,6 +58,10 @@ export class ChainDataService {
           .filter((k: string) => !k.includes("infura.io"))
           // Fitler bsc-dataseed no Txlogs
           .filter((k: string) => !k.includes("bsc-dataseed"))
+          // Filter out wss
+          .filter((k: string) => !k.includes("wss://"))
+          // Filter out ws
+          .filter((k: string) => !k.includes("ws://"))
           // Shuffle the array
           .sort((a: any, b: any) => (Math.random() > 0.5 ? -1 : 1)),
       }))
