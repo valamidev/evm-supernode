@@ -2,6 +2,15 @@
 
 Single Supernode for all EVM chains. Supernode allows access to all EVM chains with a single node. It acts as a proxy between the client and EVM chain nodes. Written in Node.js and Typescript, it requires Node v16 or higher.
 
+### Access every EVM chain with a single service:
+
+```
+https://localhost/chain/CHAIN_ID
+
+Example:
+const provider = new ethers.JsonRpcProvider("https://localhost/chain/56");
+```
+
 ### Docker image available:
 
 - https://hub.docker.com/r/valamidev/evm-supernode
@@ -14,7 +23,6 @@ docker run --name supernode -p 443:443 --restart always -d --memory 512m valamid
 
 - Resilient RPC proxy compatible with Web3.js and EtherJS or any other JSON-RPC client
 - Optimized for speed and low memory/CPU usage
-- Broadcast Blocks and TransactionLogs on WebSocket
 - Use https://github.com/DefiLlama/chainlist to explore available EVM chains and public nodes
 - Store metadata about public nodes, such as latency, errors, and rate limits
 
@@ -33,20 +41,9 @@ docker run --name supernode -p 443:443 --restart always -d --memory 512m valamid
 
 ```
     "proxyEnabled": true, // Proxy Mode On/Off
-    "realTimeBlockFetch": false, // Fetch latest block with an interval needed for Websocket
-    "websocketEnabled": false, // Allow to connect via websocket to the Supernode
-    "websocketPort": 8080, // Websocket port
     "loggingEnabled": false, // Verbose logging
-    "blockStoreEnabled": false, // Allow to store blocks (Experimental no rotation enabled yet)
     "nodeStorage": true, // Allow to store RPC Node metadata, improve restart speed and stability
     "enableWhitelist": false, // Allow only whitelisted chainIds to load
-    "whitelistChains": [1,25,56,137,250,2000,42161,43114],
-    "chainConfigs": {
-        "1": {
-            "name": "Ethereum",
-            "blockTimeMs": 12000 // Default blocktime used to calculate optimal fetch interval for new blocks
-        },
-    }
 ```
 
 ### Service end-points:

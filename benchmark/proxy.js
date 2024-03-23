@@ -3,7 +3,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const ethers = require("ethers");
 
 const batchSize = 10;
-const numRequests = 50000;
+const numRequests = 500;
 const chainId = 56; // replace with the desired chain ID
 
 async function makeRequests() {
@@ -26,6 +26,8 @@ async function makeRequests() {
       );
     }
     const result = await Promise.all(requests);
+
+    console.log(result[0]);
 
     if (!result[0]) {
       console.log("Error invalid repsonse", result[0]);

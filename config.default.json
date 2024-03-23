@@ -1,8 +1,6 @@
 {
   "proxyEnabled": true,
-  "realTimeBlockFetch": false,
-  "websocketEnabled": false,
-  "websocketPort": 8080,
+
   "loggingEnabled": false,
   "logLevel": 0,
   "blockStoreEnabled": false,

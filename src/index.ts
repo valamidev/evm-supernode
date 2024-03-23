@@ -29,31 +29,6 @@ const Bootstrap = async () => {
 
   console.log("Chain data loaded...", chainData.length, " chain found");
 
-  if (config.websocketEnabled) {
-    const server = new WebSocket.Server({
-      port: config?.websocketPort ?? 8080,
-    });
-
-    server.on("connection", (socket) => {
-      console.log("Client connected");
-
-      eventHandler.on("newBlock", (data) => {
-        socket.send(
-          JSON.stringify({
-            event: `newBlock:${data.chainId}`,
-            data,
-          })
-        );
-      });
-
-      socket.on("close", () => {
-        console.log("Client disconnected");
-      });
-    });
-
-    console.log("Websocket is running...");
-  }
-
   for (const chain of chainData) {
     const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 

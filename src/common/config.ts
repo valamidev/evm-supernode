@@ -11,8 +11,6 @@ export class ChainConfig {
 export class ConfigInterface {
   public proxyEnabled?: boolean;
   public realTimeBlockFetch?: boolean;
-  public websocketEnabled?: boolean;
-  public websocketPort?: number;
   public blockStoreEnabled?: boolean;
   public loggingEnabled?: boolean;
   public logLevel?: number;
