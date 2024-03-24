@@ -14,6 +14,7 @@
     "start:docker": "node ./dist/index.js",
     "bench": "node ./benchmark/proxy.js",
     "build": "tsc",
+    "docker:run": "docker build -t evm-supernode:dev . && docker run --rm -p 443:443 evm-supernode:dev",
     "docker": "docker build -t evm-supernode .",
     "docker:tag": "docker tag evm-supernode valamidev/evm-supernode:latest",
     "docker:push": "docker push valamidev/evm-supernode:latest",
