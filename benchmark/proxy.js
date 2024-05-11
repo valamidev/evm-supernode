@@ -9,13 +9,13 @@ const chainId = 56; // replace with the desired chain ID
 async function makeRequests() {
   let requestId = 1;
 
+  const provider = new ethers.JsonRpcProvider(
+    `https://localhost/chain/${chainId}`
+  );
+
   for (let i = 0; i < numRequests; i += batchSize) {
     const requests = [];
     for (let j = i; j < i + batchSize && j < numRequests; j++) {
-      const provider = new ethers.JsonRpcProvider(
-        `https://localhost/chain/${chainId}`
-      );
-
       //  requests.push(provider.getFeeData());
 
       requests.push(

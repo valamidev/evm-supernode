@@ -110,6 +110,10 @@ export class EthereumAPI {
 
       this.LogPerf(startTime);
 
+      if (!json.result) {
+        throw new Error("No result in response");
+      }
+
       return json.result;
     } catch (error) {
       this.errorCount++;
@@ -202,7 +206,10 @@ export class EthereumAPI {
   private HandleError(json: any) {
     // Case when it is not a batch request
     if (!json[0]) {
-      if (!json.error) return;
+      if (json.error) {
+        this.parseError(json);
+      }
+      return;
     }
 
     if (json[0]) {
@@ -233,6 +240,10 @@ export class EthereumAPI {
       knownError = true;
     }
 
+    if (payload.error.message?.includes("rate limit")) {
+      this.rateLimited++;
+      knownError = true;
+    }
     if (payload.error.message?.includes("limit exceeded")) {
       this.rateLimited++;
       knownError = true;
@@ -248,6 +259,10 @@ export class EthereumAPI {
 
     if (payload.error.message) {
       throw new Error("RPC Error: " + payload.error.message);
+    }
+
+    if (typeof payload.error === "string") {
+      throw new Error("RPC Error: " + payload.error);
     }
   }
 

@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { LogLevel } from "../constraints";
 
 export class ChainConfig {
   name?: string;

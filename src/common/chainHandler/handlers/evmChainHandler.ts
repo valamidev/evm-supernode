@@ -1,5 +1,5 @@
 import { EventHandler } from "../../../component/eventHandler";
-import { LogLevel, MINUTE_IN_MS, SECOND_IN_MS } from "../../../constraints";
+import { LogLevel, MINUTE_IN_MS, SECOND_IN_MS } from "../../../constants";
 import { Config } from "../../config";
 import { EthereumAPI } from "../../evm/rpcClient";
 import {
@@ -118,8 +118,12 @@ export class EvmChainHandler {
           } else {
             this.providers.push(provider);
           }
-        } catch (error) {
-          this.Logging(`Unable to init RPC, ${provider.endpointUrl}`, error);
+        } catch (error: any) {
+          this.Logging(
+            `Unable to init RPC, ${provider.endpointUrl}`,
+            error.message
+          );
+          continue;
         }
       }
 
