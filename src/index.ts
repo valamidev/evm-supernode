@@ -1,13 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import fs from "fs";
-
-import WebSocket from "ws";
 import { ChainDataService } from "./common/chainData/chainData";
 import { ChainHandler } from "./common/chainHandler/chainHandler";
 import { EventHandler } from "./component/eventHandler";
 import { Config } from "./common/config";
+import EventEmitter from "node:events";
 
 import { NodeStorageRepository } from "./component/nodeStorage";
 import { RpcProxy } from "./common/rpcProxy/rpcProxy";
@@ -15,6 +13,8 @@ import { RpcProxy } from "./common/rpcProxy/rpcProxy";
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err, err.stack);
 });
+
+EventEmitter.defaultMaxListeners = 1000;
 
 const Bootstrap = async () => {
   const config = Config.load();
@@ -40,9 +40,7 @@ const Bootstrap = async () => {
     listener.Start();
   }
 
-  if (config.proxyEnabled) {
-    const proxy = new RpcProxy();
-  }
+  const proxy = new RpcProxy();
 
   console.log("EVM Supernode is running...");
 };

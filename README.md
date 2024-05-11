@@ -40,10 +40,8 @@ docker run --name supernode -p 443:443 --restart always -d --memory 512m valamid
 ### Config:
 
 ```
-    "proxyEnabled": true, // Proxy Mode On/Off
     "loggingEnabled": false, // Verbose logging
     "nodeStorage": true, // Allow to store RPC Node metadata, improve restart speed and stability
-    "enableWhitelist": false, // Allow only whitelisted chainIds to load
 ```
 
 ### Service end-points:

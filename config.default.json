@@ -1,9 +1,6 @@
 {
-  "proxyEnabled": true,
-
   "loggingEnabled": false,
   "logLevel": 0,
   "blockStoreEnabled": false,
-  "nodeStorage": true,
-  "enableWhitelist": true
+  "nodeStorage": true
 }

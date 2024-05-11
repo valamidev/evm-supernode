@@ -8,12 +8,10 @@ export class ChainConfig {
 }
 
 export class ConfigInterface {
-  public proxyEnabled?: boolean;
   public realTimeBlockFetch?: boolean;
   public blockStoreEnabled?: boolean;
   public loggingEnabled?: boolean;
   public logLevel?: number;
-  public enableWhitelist?: boolean;
   public whitelistChains?: number[];
   public chainConfigs?: {
     [key: string]: ChainConfig;
