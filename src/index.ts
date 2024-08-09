@@ -29,15 +29,27 @@ const Bootstrap = async () => {
 
   console.log("Chain data loaded...", chainData.length, " chain found");
 
-  for (const chain of chainData) {
-    const startNodes = await nodeStorage.findStartNodes(chain.chainId);
+  if (config.trustedNodes) {
+    const chainIds = Object.keys(config.trustedNodes);
 
-    const listener = ChainHandler.init(chain.chainId, chain.name, [
-      ...startNodes.map((e) => e.rpcAddress),
-      ...chain.rpcs,
-    ]);
+    for (const chainId of chainIds) {
+      const rpcAddresses = config.trustedNodes[Number(chainId)];
 
-    listener.Start();
+      const listener = ChainHandler.init(Number(chainId), chainId, [
+        ...rpcAddresses,
+      ]);
+    }
+  } else {
+    for (const chain of chainData) {
+      const startNodes = await nodeStorage.findStartNodes(chain.chainId);
+
+      const listener = ChainHandler.init(chain.chainId, chain.name, [
+        ...startNodes.map((e) => e.rpcAddress),
+        ...chain.rpcs,
+      ]);
+
+      listener.Start();
+    }
   }
 
   const proxy = new RpcProxy();

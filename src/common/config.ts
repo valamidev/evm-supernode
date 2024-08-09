@@ -12,11 +12,7 @@ export class ConfigInterface {
   public blockStoreEnabled?: boolean;
   public loggingEnabled?: boolean;
   public logLevel?: number;
-  public whitelistChains?: number[];
-  public chainConfigs?: {
-    [key: string]: ChainConfig;
-  };
-  public nodeAddresses?: string[];
+  public trustedNodes?: Record<number, string[]>;
 }
 
 export class Config implements ConfigInterface {

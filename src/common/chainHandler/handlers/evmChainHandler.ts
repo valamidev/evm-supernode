@@ -59,13 +59,7 @@ export class EvmChainHandler {
             this.maxRequestTime
           );
 
-          if (result && result.error) {
-            throw new Error(result.error.message);
-          }
-
-          if (result[0] && result[0]?.error) {
-            throw new Error(result[0]?.error?.message || "Unknown error");
-          }
+          this.ParseErrors(result);
 
           response = result;
         } catch (error) {
@@ -84,7 +78,17 @@ export class EvmChainHandler {
             this.maxProxyRequestTime
           );
 
-          response = success[0];
+          for (const successResponse of success) {
+            try {
+              this.ParseErrors(successResponse);
+
+              response = successResponse;
+            } catch (error) {
+              if (this.logLevel >= LogLevel.Trace) {
+                this.Logging("ProxyRequestHandler Fast Track failed", error);
+              }
+            }
+          }
         }
 
         if (response) {
@@ -102,6 +106,36 @@ export class EvmChainHandler {
         }
       }
     });
+  }
+
+  // Parse funny errors from providers
+  private ParseErrors(payload: any) {
+    if (!payload) {
+      throw new Error("Unknown error, missing response");
+    }
+
+    if (payload.error) {
+      throw new Error(payload.error?.message || "Unknown error");
+    }
+
+    if (payload.result?.code) {
+      if (payload.result?.code !== 200) {
+        throw new Error(payload.result?.message || "Unknown error");
+      }
+    }
+
+    if (payload.result?.message) {
+      if (
+        payload.message?.includes("requests exceeded") ||
+        payload.message?.includes("rate limit")
+      ) {
+        throw new Error(payload.result?.message);
+      }
+    }
+
+    if (payload[0]) {
+      this.ParseErrors(payload[0]);
+    }
   }
 
   private async LoadProviders() {

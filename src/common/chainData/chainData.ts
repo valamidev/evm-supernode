@@ -1,4 +1,5 @@
 import { EventHandler } from "../../component/eventHandler";
+import { ChainListData } from "../../types";
 import { fetchChainIds } from "./handlers/chainlist";
 import { fetchExtraRpcs } from "./handlers/chainRpcList";
 
@@ -27,7 +28,7 @@ export class ChainDataService {
     }
   }
 
-  async getChainData() {
+  async getChainData(): Promise<ChainListData[]> {
     const chanIds = await fetchChainIds();
 
     const rpcData = await fetchExtraRpcs();
