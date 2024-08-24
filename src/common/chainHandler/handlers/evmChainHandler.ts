@@ -21,6 +21,9 @@ export class EvmChainHandler {
   private readonly logLevel: number;
   private lastRequestTime: number = 0;
 
+  private readonly maxRetries = 3;
+  private readonly retryDelay = 1000; // 1 second
+
   constructor(
     private chainId: number,
     private chainName: string,
@@ -47,65 +50,89 @@ export class EvmChainHandler {
     this.eventHandler.on("rpcRequest", async (data) => {
       if (data.chainId === this.chainId) {
         this.lastRequestTime = Date.now();
-
-        let response = undefined;
-
-        // Fast Track
-        try {
-          const fastProvider = this.GetFastestProvider();
-
-          const result = await RequestPromisesWithTimeout(
-            fastProvider.ProxyRequest(data.body),
-            this.maxRequestTime
-          );
-
-          this.ParseErrors(result);
-
-          response = result;
-        } catch (error) {
-          if (this.logLevel >= LogLevel.Trace) {
-            this.Logging("ProxyRequestHandler Fast Track failed", error);
-          }
-        }
+        let response = await this.tryFastTrack(data.body);
 
         if (!response) {
-          const promises = this.providers.map((provider) => {
-            return provider.ProxyRequest(data.body);
-          });
-
-          const { success, error } = await RequestMultiplePromisesWithTimeout(
-            promises,
-            this.maxProxyRequestTime
-          );
-
-          for (const successResponse of success) {
-            try {
-              this.ParseErrors(successResponse);
-
-              response = successResponse;
-            } catch (error) {
-              if (this.logLevel >= LogLevel.Trace) {
-                this.Logging("ProxyRequestHandler Fast Track failed", error);
-              }
-            }
-          }
+          response = await this.tryAllProviders(data.body);
         }
 
-        if (response) {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, response);
-        } else {
-          this.eventHandler.emit(`rpcResponse:${data.requestId}`, {
-            jsonrpc: "2.0",
-            id: null,
-            error: {
-              code: -32603,
-              message: "RPC-proxy error",
-              data: "Unable to receive response from any provider",
-            },
-          });
-        }
+        this.emitResponse(data.requestId, response);
       }
     });
+  }
+
+  private async tryFastTrack(body: any): Promise<any> {
+    try {
+      const fastProvider = this.GetFastestProvider();
+      if (!fastProvider) return null;
+
+      const result = await this.retryRequest(
+        () => fastProvider.ProxyRequest(body),
+        this.maxRequestTime
+      );
+      this.ParseErrors(result);
+      return result;
+    } catch (error) {
+      this.logTrace("ProxyRequestHandler Fast Track failed", error);
+      return null;
+    }
+  }
+
+  private async tryAllProviders(body: any): Promise<any> {
+    const promises = this.providers.map((provider) =>
+      provider.ProxyRequest(body)
+    );
+    const { success } = await RequestMultiplePromisesWithTimeout(
+      promises,
+      this.maxProxyRequestTime
+    );
+
+    for (const response of success) {
+      try {
+        this.ParseErrors(response);
+        return response;
+      } catch (error) {
+        this.logTrace("Provider response failed validation", error);
+      }
+    }
+    return null;
+  }
+
+  private emitResponse(requestId: string, response: any) {
+    if (response) {
+      this.eventHandler.emit(`rpcResponse:${requestId}`, response);
+    } else {
+      this.eventHandler.emit(`rpcResponse:${requestId}`, {
+        jsonrpc: "2.0",
+        id: null,
+        error: {
+          code: -32603,
+          message: "RPC-proxy error",
+          data: "Unable to receive response from any provider",
+        },
+      });
+    }
+  }
+
+  private async retryRequest<T>(
+    fn: () => Promise<T>,
+    timeout: number
+  ): Promise<T> {
+    for (let i = 0; i < this.maxRetries; i++) {
+      try {
+        return await RequestPromisesWithTimeout(fn(), timeout);
+      } catch (error) {
+        if (i === this.maxRetries - 1) throw error;
+        await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+      }
+    }
+    throw new Error("Max retries reached");
+  }
+
+  private logTrace(message: string, error: any) {
+    if (this.logLevel >= LogLevel.Trace) {
+      this.Logging(message, error);
+    }
   }
 
   // Parse funny errors from providers
