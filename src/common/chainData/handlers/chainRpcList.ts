@@ -36,7 +36,7 @@ export const fetchExtraRpcs = async () => {
   // Fallback to last working version
   try {
     const response = await fetch(
-      "https://raw.githubusercontent.com/DefiLlama/chainlist/b9857beb81d48c041ad906a6bb51e4b36fc58186/constants/extraRpcs.js"
+      "https://raw.githubusercontent.com/DefiLlama/chainlist/7cad8586ab02bf80656fc08318e7c39217653e06/constants/extraRpcs.js"
     );
     const data = await response.text();
 
@@ -62,7 +62,7 @@ export const fetchExtraRpcs = async () => {
 
       return rpcList;
     } else {
-      console.log("Extra RPCs not found in file.");
+      console.log("Extra RPCs not found in fallback file.");
     }
   } catch (error) {
     console.error(error);
