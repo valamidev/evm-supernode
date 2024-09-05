@@ -156,7 +156,15 @@ export class EthereumAPI {
   }
 
   async getChainId() {
-    return parseInt(await this.MakeRequest("eth_chainId", []), 16);
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), 10000)
+    );
+
+    const request = this.MakeRequest("eth_chainId", []).then((response) =>
+      parseInt(response, 16)
+    );
+
+    return Promise.race([request, timeout]);
   }
 
   async getBlockNumber() {

@@ -82,6 +82,7 @@ export class EvmChainHandler {
     const promises = this.providers.map((provider) =>
       provider.ProxyRequest(body)
     );
+
     const { success } = await RequestMultiplePromisesWithTimeout(
       promises,
       this.maxProxyRequestTime
@@ -166,11 +167,11 @@ export class EvmChainHandler {
   }
 
   private async LoadProviders() {
-    for (const rpc of this.rpcs) {
-      const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
-
+    for (const rpc of this.rpcs.sort(() => Math.random() - 0.5)) {
       if (this.providers.length < this.maxProviderCount) {
         try {
+          const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+
           const chainId = await provider.getChainId();
           if (chainId !== this.chainId) {
             this.Logging(
@@ -178,17 +179,12 @@ export class EvmChainHandler {
             );
           } else {
             this.providers.push(provider);
+            this.allProviders.push(provider);
           }
         } catch (error: any) {
-          this.Logging(
-            `Unable to init RPC, ${provider.endpointUrl}`,
-            error.message
-          );
-          continue;
+          this.Logging(`Unable to init RPC, ${rpc}`, error.message);
         }
       }
-
-      this.allProviders.push(provider);
     }
   }
 
