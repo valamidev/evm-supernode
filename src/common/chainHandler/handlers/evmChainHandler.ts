@@ -142,7 +142,7 @@ export class EvmChainHandler {
       throw new Error("Unknown error, missing response");
     }
 
-    if (payload.error) {
+    if (payload.error && !payload.error?.data) {
       throw new Error(payload.error?.message || "Unknown error");
     }
 

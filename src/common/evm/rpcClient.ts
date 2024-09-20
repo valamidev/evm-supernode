@@ -232,11 +232,8 @@ export class EthereumAPI {
 
     this.errorCount++;
 
-    let knownError = false;
-
     if (payload.error.message?.includes("usage limit")) {
       this.rateLimited++;
-      knownError = true;
     }
 
     if (
@@ -245,27 +242,35 @@ export class EthereumAPI {
       )
     ) {
       this.rateLimited++;
-      knownError = true;
     }
 
     if (payload.error.message?.includes("rate limit")) {
       this.rateLimited++;
-      knownError = true;
     }
     if (payload.error.message?.includes("limit exceeded")) {
       this.rateLimited++;
-      knownError = true;
     }
     if (payload.error.message?.includes("reached")) {
       this.rateLimited++;
-      knownError = true;
     }
     if (payload.error.message?.includes("Too Many Requests")) {
       this.rateLimited++;
-      knownError = true;
     }
 
     if (payload.error.message) {
+      // Valid RPC Errors
+      if (payload.error.message.includes("execution reverted:")) {
+        return;
+      }
+
+      if (payload.error.message && payload.error.code === 3) {
+        return;
+      }
+
+      if (payload.error.message && payload.error.code && payload.error.data) {
+        return;
+      }
+
       throw new Error("RPC Error: " + payload.error.message);
     }
 
