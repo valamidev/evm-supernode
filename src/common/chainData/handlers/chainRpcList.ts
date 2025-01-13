@@ -30,7 +30,7 @@ export const fetchExtraRpcs = async () => {
       console.log("Extra RPCs not found in file.");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Invalid RPC list file (up to date)", error);
   }
 
   // Fallback to last working version
@@ -65,6 +65,6 @@ export const fetchExtraRpcs = async () => {
       console.log("Extra RPCs not found in fallback file.");
     }
   } catch (error) {
-    console.error(error);
+    console.error("Invalid RPC list file (fallback)", error);
   }
 };

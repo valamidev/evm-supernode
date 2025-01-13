@@ -29,7 +29,7 @@ export class ChainDataService {
   }
 
   async getChainData(): Promise<ChainListData[]> {
-    const chanIds = await fetchChainIds();
+    const chanIds = fetchChainIds;
 
     const rpcData = await fetchExtraRpcs();
 
@@ -39,7 +39,7 @@ export class ChainDataService {
         [key]: {
           ...rpcData[key],
           chainId: Number(key),
-          name: chanIds[key] || null,
+          name: (chanIds as any)[key] || null,
         },
       };
     }, {});
