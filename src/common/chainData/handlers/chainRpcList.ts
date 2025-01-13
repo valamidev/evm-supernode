@@ -36,7 +36,7 @@ export const fetchExtraRpcs = async () => {
   // Fallback to last working version
   try {
     const response = await fetch(
-      "https://raw.githubusercontent.com/DefiLlama/chainlist/7cad8586ab02bf80656fc08318e7c39217653e06/constants/extraRpcs.js"
+      "https://raw.githubusercontent.com/DefiLlama/chainlist/ba823c899e2079743f3ee945f89c37f798eccb1b/constants/extraRpcs.js"
     );
     const data = await response.text();
 
