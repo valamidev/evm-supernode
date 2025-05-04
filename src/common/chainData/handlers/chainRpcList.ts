@@ -1,3 +1,24 @@
+export const fetchErpcRpcList = async (): Promise<Record<
+  string,
+  {
+    chainId: number;
+    endpoints: string[];
+  }
+> | null> => {
+  try {
+    // https://evm-public-endpoints.erpc.cloud/
+    const response = await fetch("https://evm-public-endpoints.erpc.cloud/");
+
+    const data = await response.json();
+
+    return data;
+  } catch (error) {
+    console.error("Invalid RPC list file (up to date)", error);
+  }
+
+  return null;
+};
+
 export const fetchExtraRpcs = async () => {
   try {
     const response = await fetch(

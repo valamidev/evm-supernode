@@ -25,9 +25,9 @@ const Bootstrap = async () => {
 
   const chainDataService = new ChainDataService();
 
-  const chainData = await chainDataService.getChainData();
+  await chainDataService.start();
 
-  console.log("Chain data loaded...", chainData.length, " chain found");
+  console.log("RPC data loaded...");
 
   if (config.trustedNodes) {
     const chainIds = Object.keys(config.trustedNodes);
@@ -40,7 +40,7 @@ const Bootstrap = async () => {
       ]);
     }
   } else {
-    for (const chain of chainData) {
+    for (const chain of chainDataService.chainData) {
       const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
       const listener = ChainHandler.init(chain.chainId, chain.name, [

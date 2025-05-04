@@ -1,4 +1,4 @@
-export const fetchChainIds = {
+export const chainIdToName = {
   "1": "ethereum",
   "8": "ubiq",
   "10": "optimism",

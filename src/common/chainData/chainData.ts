@@ -1,10 +1,11 @@
 import { EventHandler } from "../../component/eventHandler";
 import { ChainListData } from "../../types";
-import { fetchChainIds } from "./handlers/chainlist";
-import { fetchExtraRpcs } from "./handlers/chainRpcList";
+import { chainIdToName } from "./handlers/chainlist";
+import { fetchErpcRpcList, fetchExtraRpcs } from "./handlers/chainRpcList";
 
 export class ChainDataService {
   eventHandler: EventHandler;
+  chainData: ChainListData[];
   constructor() {
     this.eventHandler = EventHandler.getInstance();
 
@@ -17,10 +18,15 @@ export class ChainDataService {
     }, 1000 * 60 * 60);
   }
 
-  async refreshNodes() {
-    const chainDatas = await this.getChainData();
+  async start() {
+    await this.loadChainListData();
+    await this.loadErpcData();
+  }
 
-    for (const chain of chainDatas) {
+  async refreshNodes() {
+    await this.loadChainListData();
+
+    for (const chain of this.chainData) {
       this.eventHandler.EmitRpcNodes({
         chainId: chain.chainId,
         nodes: chain.rpcs,
@@ -28,8 +34,52 @@ export class ChainDataService {
     }
   }
 
-  async getChainData(): Promise<ChainListData[]> {
-    const chanIds = fetchChainIds;
+  addToChainDataList(chainId: number, name: string, rpcs: string[]) {
+    this.chainData = this.chainData || [];
+
+    const existingChain = this.chainData.find(
+      (chain) => chain.chainId === chainId
+    );
+
+    if (existingChain) {
+      existingChain.rpcs = [...new Set([...existingChain.rpcs, ...rpcs])];
+    } else {
+      this.chainData.push({ chainId, name, rpcs });
+    }
+  }
+
+  async loadErpcData(): Promise<void> {
+    const rpcData = await fetchErpcRpcList();
+
+    if (!rpcData) {
+      console.log("No RPC data found from erpc");
+      return;
+    }
+
+    for (const chain of Object.values(rpcData)) {
+      const chainId = Number(chain.chainId);
+      const chainName =
+        (chainIdToName as any)[chain.chainId] || "Unknown chain - " + chainId;
+
+      if (!chain.endpoints) {
+        continue;
+      }
+
+      const filteredEndpoints = chain.endpoints
+        .filter((k: string) => !k.includes("wss://"))
+        // Filter out ws
+        .filter((k: string) => !k.includes("ws://"));
+
+      if (!filteredEndpoints?.length || filteredEndpoints?.length <= 2) {
+        continue;
+      }
+
+      this.addToChainDataList(chainId, chainName, filteredEndpoints);
+    }
+  }
+
+  async loadChainListData(): Promise<void> {
+    const chanIds = chainIdToName;
 
     const rpcData = await fetchExtraRpcs();
 
@@ -39,7 +89,7 @@ export class ChainDataService {
         [key]: {
           ...rpcData[key],
           chainId: Number(key),
-          name: (chanIds as any)[key] || null,
+          name: (chanIds as any)[key] || "Unknown chain - " + key,
         },
       };
     }, {});
@@ -68,6 +118,14 @@ export class ChainDataService {
       }))
       .filter((x: any) => x.name && x.rpcs.length >= 3);
 
-    return chainDatas;
+    console.log("Chainlist data loaded", chainDatas.length, "chains found");
+
+    for (const chain of chainDatas) {
+      if (!chain.rpcs?.length || chain.rpcs?.length <= 2) {
+        continue;
+      }
+
+      this.addToChainDataList(chain.chainId, chain.name, chain.rpcs);
+    }
   }
 }
