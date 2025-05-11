@@ -8,6 +8,7 @@ import {
 } from "../../promise/handler";
 
 export class EvmChainHandler {
+  private readonly maxProviderCount = 5;
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
 
@@ -167,20 +168,22 @@ export class EvmChainHandler {
 
   private async LoadProviders() {
     for (const rpc of this.rpcs.sort(() => Math.random() - 0.5)) {
-      try {
-        const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+      if (this.providers.length < this.maxProviderCount) {
+        try {
+          const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
 
-        const chainId = await provider.getChainId();
-        if (chainId !== this.chainId) {
-          this.Logging(
-            `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
-          );
-        } else {
-          this.providers.push(provider);
-          this.allProviders.push(provider);
+          const chainId = await provider.getChainId();
+          if (chainId !== this.chainId) {
+            this.Logging(
+              `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
+            );
+          } else {
+            this.providers.push(provider);
+            this.allProviders.push(provider);
+          }
+        } catch (error: any) {
+          this.Logging(`Unable to init RPC, ${rpc}`, error.message);
         }
-      } catch (error: any) {
-        this.Logging(`Unable to init RPC, ${rpc}`, error.message);
       }
     }
   }
