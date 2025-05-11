@@ -73,7 +73,7 @@ export class RpcProxy {
           this.eventHandler.removeAllListeners(`rpcResponse:${requestId}`);
 
           return;
-        }, 10000);
+        }, 15_000);
 
         this.eventHandler.once(`rpcResponse:${requestId}`, (data) => {
           if (finished === 1) {

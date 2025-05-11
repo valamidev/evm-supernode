@@ -11,7 +11,7 @@ export class EvmChainHandler {
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
 
-  private maxRequestTime: number = 1500;
+  private maxFastRequestTime: number = 1500;
   private maxProxyRequestTime: number = 5000;
   private latestBlock: number = 0;
 
@@ -67,7 +67,7 @@ export class EvmChainHandler {
 
       const result = await this.retryRequest(
         () => fastProvider.ProxyRequest(body),
-        this.maxRequestTime
+        this.maxFastRequestTime
       );
       this.ParseErrors(result);
       return result;
