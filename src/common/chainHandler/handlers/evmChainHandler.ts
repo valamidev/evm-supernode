@@ -8,7 +8,7 @@ import {
 } from "../../promise/handler";
 
 export class EvmChainHandler {
-  private readonly maxProviderCount = 5;
+  private readonly maxProviderCount = 6;
   private readonly providers: EthereumAPI[] = [];
   private readonly allProviders: EthereumAPI[] = [];
 
