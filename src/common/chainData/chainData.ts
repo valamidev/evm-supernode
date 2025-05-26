@@ -116,16 +116,20 @@ export class ChainDataService {
           // Shuffle the array
           .sort((a: any, b: any) => (Math.random() > 0.5 ? -1 : 1)),
       }))
-      .filter((x: any) => x.name && x.rpcs.length >= 3);
+      .filter((x: any) => x.name);
 
-    console.log("Chainlist data loaded", chainDatas.length, "chains found");
+    let i = 0;
 
     for (const chain of chainDatas) {
-      if (!chain.rpcs?.length || chain.rpcs?.length <= 2) {
+      if (!chain.rpcs?.length || chain.rpcs?.length <= 5) {
         continue;
       }
 
+      i++;
+
       this.addToChainDataList(chain.chainId, chain.name, chain.rpcs);
     }
+
+    console.log("Chainlist data loaded", i, "chains found");
   }
 }

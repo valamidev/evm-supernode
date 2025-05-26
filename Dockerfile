@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:23-alpine
 WORKDIR /app
 COPY package.json yarn.lock ./
 COPY src ./src
@@ -8,7 +8,7 @@ RUN yarn install --frozen-lockfile
 RUN yarn build
 
 ## this is stage two , where the app actually runs
-FROM node:22-alpine
+FROM node:23-alpine
 WORKDIR /app
 COPY package.json yarn.lock ./
 COPY assets ./assets
