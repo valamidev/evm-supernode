@@ -13,6 +13,7 @@ export class ConfigInterface {
   public loggingEnabled?: boolean;
   public logLevel?: number;
   public trustedNodes?: Record<number, string[]>;
+  public allowedNetwork?: number[];
 }
 
 export class Config implements ConfigInterface {

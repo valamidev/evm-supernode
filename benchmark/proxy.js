@@ -4,7 +4,7 @@ const ethers = require("ethers");
 
 const batchSize = 10;
 const numRequests = 500;
-const chainId = 56; // replace with the desired chain ID
+const chainId = 42161; // replace with the desired chain ID
 
 async function makeRequests() {
   let requestId = 1;

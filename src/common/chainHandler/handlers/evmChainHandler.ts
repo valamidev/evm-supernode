@@ -38,6 +38,26 @@ export class EvmChainHandler {
     this.NewProviderHandler();
   }
 
+  private NewProviderHandler() {
+    this.eventHandler.on("rpcNode", (event) => {
+      if (event.chainId !== this.chainId) {
+        return;
+      }
+
+      const uniqueProviders = new Set([...this.rpcs.map((e) => e)]);
+
+      event.nodes.forEach(async (endpointUrl: string) => {
+        if (!uniqueProviders.has(endpointUrl)) {
+          this.rpcs.push(endpointUrl);
+        }
+      });
+
+      this.RefreshAllProviders();
+
+      this.RefreshProviders();
+    });
+  }
+
   public Start() {
     setInterval(() => {
       if (this.lastRequestTime > Date.now() - MINUTE_IN_MS) {
@@ -168,47 +188,53 @@ export class EvmChainHandler {
 
   private async LoadProviders() {
     for (const rpc of this.rpcs.sort(() => Math.random() - 0.5)) {
-      if (this.providers.length < this.maxProviderCount) {
-        try {
-          const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+      try {
+        const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
 
-          const chainId = await provider.getChainId();
-          if (chainId !== this.chainId) {
-            this.Logging(
-              `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
-            );
-          } else {
+        const chainId = await provider.getChainId();
+        if (chainId === this.chainId) {
+          // Only keep 5 providers for processing
+          if (this.providers.length < this.maxProviderCount) {
             this.providers.push(provider);
-            this.allProviders.push(provider);
           }
-        } catch (error: any) {
-          this.Logging(`Unable to init RPC, ${rpc}`, error.message);
+          this.allProviders.push(provider);
         }
+      } catch (error: any) {
+        this.Logging(`Unable to init RPC, ${rpc}`, error.message);
       }
     }
+
+    this.Logging(
+      `Chain ${this.chainName} initialized with ${this.allProviders.length} providers from ${this.rpcs.length} endpoints.`
+    );
   }
 
-  private NewProviderHandler() {
-    this.eventHandler.on("rpcNode", (event) => {
-      const uniqueProviders = new Set([
-        ...this.allProviders.map((e) => e.endpointUrl),
-      ]);
+  private async RefreshAllProviders() {
+    const uniqueProviders = new Set([
+      ...this.allProviders.map((e) => e.endpointUrl),
+    ]);
 
-      if (event.chainId === this.chainId) {
-        event.nodes.forEach(async (endpointUrl: string) => {
-          if (!uniqueProviders.has(endpointUrl)) {
-            const provider = new EthereumAPI(
-              endpointUrl,
-              this.chainId,
-              this.chainName
-            );
-            this.allProviders.push(provider);
-          }
-        });
+    for (const rpc of this.rpcs) {
+      // Already known rpc
+      if (!uniqueProviders.has(rpc)) {
+        continue;
       }
 
-      this.RefreshProviders();
-    });
+      try {
+        const provider = new EthereumAPI(rpc, this.chainId, this.chainName);
+
+        const chainId = await provider.getChainId();
+        if (chainId !== this.chainId) {
+          this.Logging(
+            `ChainId mismatch. ${provider.endpointUrl} Expected: ${this.chainId}, received: ${chainId}`
+          );
+        } else {
+          this.allProviders.push(provider);
+        }
+      } catch (error: any) {
+        this.Logging(`Unable to init RPC, ${rpc}`, error.message);
+      }
+    }
   }
 
   private GetFastestProvider() {
@@ -271,7 +297,9 @@ export class EvmChainHandler {
         const chainId = await nextProvider.getChainId();
 
         if (chainId === this.chainId) {
-          this.providers.pop();
+          if (this.providers.length === this.maxProviderCount) {
+            this.providers.pop();
+          }
 
           this.providers.push(nextProvider);
         }

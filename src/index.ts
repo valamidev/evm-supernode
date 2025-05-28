@@ -38,9 +38,18 @@ const Bootstrap = async () => {
       const listener = ChainHandler.init(Number(chainId), chainId, [
         ...rpcAddresses,
       ]);
+
+      listener.Start();
     }
   } else {
     for (const chain of chainDataService.chainData) {
+      if (
+        config.allowedNetwork &&
+        !config.allowedNetwork.includes(chain.chainId)
+      ) {
+        continue;
+      }
+
       const startNodes = await nodeStorage.findStartNodes(chain.chainId);
 
       const listener = ChainHandler.init(chain.chainId, chain.name, [

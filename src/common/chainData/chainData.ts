@@ -3,6 +3,8 @@ import { ChainListData } from "../../types";
 import { chainIdToName } from "./handlers/chainlist";
 import { fetchErpcRpcList, fetchExtraRpcs } from "./handlers/chainRpcList";
 
+const REFRESH_NODES_INTERVAL = 1000 * 60 * 60; // 1 hour
+
 export class ChainDataService {
   eventHandler: EventHandler;
   chainData: ChainListData[];
@@ -15,7 +17,7 @@ export class ChainDataService {
       } catch (error) {
         console.log("Unable to refresh node list", error);
       }
-    }, 1000 * 60 * 60);
+    }, REFRESH_NODES_INTERVAL);
   }
 
   async start() {
