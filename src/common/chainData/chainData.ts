@@ -123,7 +123,7 @@ export class ChainDataService {
     let i = 0;
 
     for (const chain of chainDatas) {
-      if (!chain.rpcs?.length || chain.rpcs?.length <= 5) {
+      if (!chain.rpcs?.length || chain.rpcs?.length <= 2) {
         continue;
       }
 
